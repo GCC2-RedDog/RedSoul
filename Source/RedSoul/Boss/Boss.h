@@ -17,8 +17,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable)
-	virtual void Hit(FAttackInfo AttackInfo) override; 
+	virtual void Hit_Implementation(FAttackInfo AttackInfo) override;
 
 private: 
 	UPROPERTY(EditAnywhere, Category = Stat)  

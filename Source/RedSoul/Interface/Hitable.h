@@ -26,7 +26,7 @@ class REDSOUL_API IHitable
 	GENERATED_BODY()
 
 public: 
-	UFUNCTION() 
-	virtual void Hit(FAttackInfo AttackInfo) = 0;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent) 
+	void Hit(FAttackInfo AttackInfo);
 
 };

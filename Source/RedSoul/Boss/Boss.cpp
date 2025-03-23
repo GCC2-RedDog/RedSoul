@@ -21,7 +21,7 @@ void ABoss::Tick(float DeltaTime)
 
 }
 
-void ABoss::Hit(FAttackInfo AttackInfo)
+void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 { 
 	CurHP -= AttackInfo.Damage; 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Boss Hit %f"), CurHP)); 
