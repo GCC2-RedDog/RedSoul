@@ -17,7 +17,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void Hit_Implementation(FAttackInfo AttackInfo) override;
+	virtual void Hit_Implementation(FAttackInfo AttackInfo) override; 
+
 
 private: 
 	UPROPERTY(EditAnywhere, Category = Stat)  
@@ -25,4 +26,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = Stat)  
 	float CurHP; 
 
+	UPROPERTY(EditAnywhere, Category = Widget) 
+	TSubclassOf<class UBossUI> BossInfoWidget; 
+	
+	UPROPERTY()
+	TObjectPtr<UUserWidget> BossInfoObject; 
 };
