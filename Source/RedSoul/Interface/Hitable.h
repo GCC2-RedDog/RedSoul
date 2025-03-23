@@ -25,8 +25,8 @@ class REDSOUL_API IHitable
 {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION()
+public: 
+	UFUNCTION() 
 	virtual void Hit(FAttackInfo AttackInfo) = 0;
 
 };
