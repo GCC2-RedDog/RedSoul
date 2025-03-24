@@ -41,13 +41,16 @@ void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 	}
 }
 
-void ABoss::Awaken()
-{ 
-	Blackboard = Cast<AAIController>(GetController())->GetBlackboardComponent();
-}
-
 void ABoss::SetAttackState(bool State)
 { 
 	Blackboard->SetValueAsBool("IsAttacking", State); 
 	AttackCollider->SetGenerateOverlapEvents(State); 
+}
+
+FVector ABoss::GetToPlayerDir()
+{
+	FVector Dir = Player->GetActorLocation() - GetActorLocation(); 
+	Dir.Normalize(); 
+
+	return Dir; 
 }

@@ -12,6 +12,16 @@ class REDSOUL_API AAIC_Boss : public AAIController
 	GENERATED_BODY() 
 
 public: 
-	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnPossess(APawn* InPawn) override; 
+	
+	UFUNCTION(BlueprintCallable) 
+	void SetBlackboard(ACharacter* OtherCharacter);
+
+	UPROPERTY(EditAnywhere, Category = AI)
+	TObjectPtr<UBehaviorTree> BT; 
+
+private: 
+	UPROPERTY() 
+	TObjectPtr<class ABoss> Boss; 
 
 };

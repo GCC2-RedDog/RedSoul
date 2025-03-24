@@ -20,13 +20,15 @@ public:
 	virtual void Hit_Implementation(FAttackInfo AttackInfo) override; 
 
 	UFUNCTION(BlueprintCallable) 
-	void Awaken(); 
-
-	UFUNCTION(BlueprintCallable) 
 	void SetAttackState(bool State); 
+
+	UFUNCTION(BlueprintCallable)  
+	FVector GetToPlayerDir();
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UBlackboardComponent> Blackboard; 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<ACharacter> Player;
 
 private: 
 	UPROPERTY(EditAnywhere, Category = Stat)  
@@ -39,7 +41,6 @@ private:
 	
 	UPROPERTY()
 	TObjectPtr<UUserWidget> BossInfoObject; 
-
 
 	UPROPERTY() 
 	TObjectPtr<class UBoxComponent> AttackCollider; 
