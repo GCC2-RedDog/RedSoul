@@ -3,6 +3,9 @@
 
 #include "Boss.h" 
 #include "BossUI.h" 
+#include "AIC_Boss.h" 
+#include "BehaviorTree/BlackboardComponent.h" 
+#include "Components/BoxComponent.h" 
 
 ABoss::ABoss()
 {
@@ -12,8 +15,10 @@ ABoss::ABoss()
 
 void ABoss::BeginPlay() 
 {
-	Super::BeginPlay();
-	
+	Super::BeginPlay(); 
+
+	AttackCollider = FindComponentByClass<UBoxComponent>(); 
+
 	BossInfoObject = CreateWidget<UBossUI>(GetWorld(), BossInfoWidget); 
 	BossInfoObject->AddToViewport(); 
 	Cast<UBossUI>(BossInfoObject)->SetHPBar(CurHP / MaxHP); 
@@ -34,4 +39,15 @@ void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 	if (CurHP <= 0) {
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Boss Die")); 
 	}
+}
+
+void ABoss::Awaken()
+{ 
+	Blackboard = Cast<AAIController>(GetController())->GetBlackboardComponent();
+}
+
+void ABoss::SetAttackState(bool State)
+{ 
+	Blackboard->SetValueAsBool("IsAttacking", State); 
+	AttackCollider->SetGenerateOverlapEvents(State); 
 }

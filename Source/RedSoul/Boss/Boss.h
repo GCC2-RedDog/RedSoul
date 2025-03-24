@@ -15,10 +15,18 @@ class REDSOUL_API ABoss : public ACharacter, public IHitable
 public:
 	ABoss();
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override; 
 
 	virtual void Hit_Implementation(FAttackInfo AttackInfo) override; 
 
+	UFUNCTION(BlueprintCallable) 
+	void Awaken(); 
+
+	UFUNCTION(BlueprintCallable) 
+	void SetAttackState(bool State); 
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UBlackboardComponent> Blackboard; 
 
 private: 
 	UPROPERTY(EditAnywhere, Category = Stat)  
@@ -31,4 +39,9 @@ private:
 	
 	UPROPERTY()
 	TObjectPtr<UUserWidget> BossInfoObject; 
+
+
+	UPROPERTY() 
+	TObjectPtr<class UBoxComponent> AttackCollider; 
+
 };

@@ -9,6 +9,9 @@
 UCLASS()
 class REDSOUL_API AAIC_Boss : public AAIController
 {
-	GENERATED_BODY()
-	
+	GENERATED_BODY() 
+
+public: 
+	virtual void OnPossess(APawn* InPawn) override;
+
 };
