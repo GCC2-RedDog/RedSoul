@@ -28,6 +28,10 @@ void ABoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime); 
 
+	if (Player && Blackboard) { 
+		float Distance = (GetActorLocation() - Player->GetActorLocation()).Length();
+		Blackboard->SetValueAsFloat("BossToPlayerDistance", Distance);
+	}
 }
 
 void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
