@@ -58,3 +58,8 @@ FVector ABoss::GetToPlayerDir()
 
 	return Dir; 
 }
+
+void ABoss::AttachPlayer(FName SocketName, UStaticMeshComponent* SM)
+{ 
+	Player->AttachToComponent(SM, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName); 
+}

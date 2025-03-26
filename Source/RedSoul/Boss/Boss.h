@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "../Interface/Hitable.h"
+#include "../Interface/Hitable.h" 
 #include "Boss.generated.h"
 
 UCLASS()
@@ -23,7 +23,10 @@ public:
 	void SetAttackState(bool State); 
 
 	UFUNCTION(BlueprintCallable)  
-	FVector GetToPlayerDir();
+	FVector GetToPlayerDir(); 
+
+	UFUNCTION(BlueprintCallable) 
+	void AttachPlayer(FName SocketName, UStaticMeshComponent* SM); 
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UBlackboardComponent> Blackboard; 
