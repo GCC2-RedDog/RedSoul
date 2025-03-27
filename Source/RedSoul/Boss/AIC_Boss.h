@@ -13,14 +13,15 @@ class REDSOUL_API AAIC_Boss : public AAIController
 
 public: 
 	virtual void OnPossess(APawn* InPawn) override; 
+	 
+	void Awaken(ACharacter* OtherCharacter); 
 	
-	UFUNCTION(BlueprintCallable) 
-	void SetBlackboard(ACharacter* OtherCharacter);
-
 	UPROPERTY(EditAnywhere, Category = AI)
 	TObjectPtr<UBehaviorTree> BT; 
 
 private: 
+	void SetBlackboard(ACharacter* OtherCharacter); 
+
 	UPROPERTY() 
 	TObjectPtr<class ABoss> Boss; 
 

@@ -6,6 +6,7 @@
 #include "AIC_Boss.h" 
 #include "BehaviorTree/BlackboardComponent.h" 
 #include "Components/BoxComponent.h" 
+#include "GameFramework/CharacterMovementComponent.h" 
 
 ABoss::ABoss()
 {
@@ -18,6 +19,8 @@ void ABoss::BeginPlay()
 	Super::BeginPlay(); 
 
 	AttackCollider = FindComponentByClass<UBoxComponent>(); 
+
+	TMesh = FindComponentByClass<UStaticMeshComponent>(); 
 
 	BossInfoObject = CreateWidget<UBossUI>(GetWorld(), BossInfoWidget); 
 	BossInfoObject->AddToViewport(); 
@@ -45,21 +48,68 @@ void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 	}
 }
 
+void ABoss::Interaction_Implementation(ACharacter* OtherCharacter)
+{ 
+	Cast<AAIC_Boss>(GetController())->Awaken(OtherCharacter); 
+}
+
 void ABoss::SetAttackState(bool State)
 { 
-	Blackboard->SetValueAsBool("IsAttacking", State); 
+	TMesh->SetMaterial(0, State ? M_Attack : M_Default); 
 	AttackCollider->SetGenerateOverlapEvents(State); 
-}
+} 
 
-FVector ABoss::GetToPlayerDir()
+FVector ABoss::GetPlayerAround(float Distance)
 {
-	FVector Dir = Player->GetActorLocation() - GetActorLocation(); 
-	Dir.Normalize(); 
+	return Player->GetActorLocation() - GetBossToPlayerDir() * Distance; 
+} 
 
-	return Dir; 
+void ABoss::CatchPlayer(FName SocketName)
+{ 
+	Player->AttachToComponent(TMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName); 
+	
+	if (auto AIC = Cast<AAIC_Boss>(GetController())) {
+		AIC->ClearFocus(2); 
+	} 
+
+	Player->GetComponentByClass<UCharacterMovementComponent>()->GravityScale = 0.0f; 
+	Player->GetComponentByClass<UCharacterMovementComponent>()->MaxWalkSpeed = 0.0f; 
 }
 
-void ABoss::AttachPlayer(FName SocketName, UStaticMeshComponent* SM)
+void ABoss::ReleasePlayer()
 { 
-	Player->AttachToComponent(SM, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName); 
+	Player->GetComponentByClass<UCharacterMovementComponent>()->GravityScale = 1.0f; 
+	Player->GetComponentByClass<UCharacterMovementComponent>()->MaxWalkSpeed = 500.0f;
+
+	Player->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform); 
+
+	LaunchPlayer(GetCatchThrowDir(), 1500.0f); 
+}
+
+void ABoss::LaunchPlayer(FVector Dir, float Force)
+{ 
+	Player->LaunchCharacter(Dir * Force, false, false); 
+}
+
+FVector ABoss::GetFistSwingDir()
+{ 
+	return AttackCollider->GetForwardVector() + FVector(0, 0, 0.1f); 
+}
+
+FVector ABoss::GetShoulderDir()
+{
+	return GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.24f); 
+}
+
+FVector ABoss::GetCatchThrowDir()
+{ 
+	return GetBossToPlayerDir() - FVector(0.0f, 0.0f, 0.65f); 
+}
+
+FVector ABoss::GetBossToPlayerDir()
+{
+	FVector Dir = Player->GetActorLocation() - GetActorLocation();
+	Dir.Normalize();
+
+	return Dir;
 }
