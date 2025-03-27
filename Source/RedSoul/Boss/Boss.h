@@ -69,4 +69,6 @@ private:
 	UPROPERTY() 
 	TObjectPtr<class UBoxComponent> AttackCollider; 
 
+	bool IsPhase2; 
+
 };

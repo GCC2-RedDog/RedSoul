@@ -34,6 +34,12 @@ void ABoss::Tick(float DeltaTime)
 	if (Player && Blackboard) { 
 		float Distance = (GetActorLocation() - Player->GetActorLocation()).Length();
 		Blackboard->SetValueAsFloat("BossToPlayerDistance", Distance);
+	} 
+
+	if (!IsPhase2 && CurHP <= MaxHP * 3 / 10.0f) { 
+		IsPhase2 = true; 
+		Blackboard->SetValueAsBool("IsPhase2", true); 
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Phase 2")); 
 	}
 }
 
