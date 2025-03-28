@@ -6,7 +6,7 @@
 #include "GameFramework/Character.h"
 #include "../Interface/Hitable.h" 
 #include "../Interface/Interactive.h" 
-#include "Boss.generated.h"
+#include "Boss.generated.h" 
 
 UCLASS()
 class REDSOUL_API ABoss : public ACharacter, public IHitable, public IInteractive 
@@ -38,7 +38,7 @@ public:
 	FVector GetFistSwingDir(); 
 	UFUNCTION(BlueprintCallable, BlueprintPure) 
 	FVector GetShoulderDir(); 
-
+	
 	UPROPERTY()
 	TObjectPtr<class UBlackboardComponent> Blackboard; 
 	UPROPERTY() 
@@ -56,6 +56,8 @@ private:
 	FVector GetBossToPlayerDir(); 
 	FVector GetCatchThrowDir();  
 
+	void Die(); 
+
 	UPROPERTY(EditAnywhere, Category = Stat)  
 	float MaxHP; 
 	UPROPERTY(EditAnywhere, Category = Stat)  
@@ -69,6 +71,7 @@ private:
 	UPROPERTY() 
 	TObjectPtr<class UBoxComponent> AttackCollider; 
 
+	bool IsAwake; 
 	bool IsPhase2; 
-
+	
 };

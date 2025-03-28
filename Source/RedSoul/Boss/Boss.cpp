@@ -45,17 +45,20 @@ void ABoss::Tick(float DeltaTime)
 
 void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 { 
-	CurHP -= AttackInfo.Damage; 
-	Cast<UBossUI>(BossInfoObject)->SetHPBar(CurHP / MaxHP); 
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Boss Hit %f"), CurHP)); 
+	if (IsAwake) {
+		CurHP -= AttackInfo.Damage;
+		Cast<UBossUI>(BossInfoObject)->SetHPBar(CurHP / MaxHP);
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Boss Hit %f"), CurHP));
 
-	if (CurHP <= 0) {
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Boss Die")); 
-	}
+		if (CurHP <= 0) {
+			Die();
+		}
+	} 
 }
 
 void ABoss::Interaction_Implementation(ACharacter* OtherCharacter)
 { 
+	IsAwake = true; 
 	Cast<AAIC_Boss>(GetController())->Awaken(OtherCharacter); 
 }
 
@@ -104,7 +107,14 @@ FVector ABoss::GetFistSwingDir()
 
 FVector ABoss::GetShoulderDir()
 {
-	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.1f)) * 1750.0f; 
+	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.1f)) * 1500.0f; 
+}
+
+void ABoss::Die()
+{ 
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Boss Die")); 
+
+	Destroy(); 
 }
 
 FVector ABoss::GetCatchThrowDir()
