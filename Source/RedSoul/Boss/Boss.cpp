@@ -104,7 +104,7 @@ FVector ABoss::GetFistSwingDir()
 
 FVector ABoss::GetShoulderDir()
 {
-	return GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.24f); 
+	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.1f)) * 1750.0f; 
 }
 
 FVector ABoss::GetCatchThrowDir()
@@ -114,7 +114,8 @@ FVector ABoss::GetCatchThrowDir()
 
 FVector ABoss::GetBossToPlayerDir()
 {
-	FVector Dir = Player->GetActorLocation() - GetActorLocation();
+	FVector Dir = Player->GetActorLocation() - GetActorLocation(); 
+	Dir.Z = 0.0f; 
 	Dir.Normalize();
 
 	return Dir;
