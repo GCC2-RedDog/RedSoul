@@ -4,23 +4,58 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "../Interface/Hitable.h"
+#include "../Interface/Hitable.h" 
+#include "../Interface/Interactive.h" 
 #include "Boss.generated.h"
 
 UCLASS()
-class REDSOUL_API ABoss : public ACharacter, public IHitable
+class REDSOUL_API ABoss : public ACharacter, public IHitable, public IInteractive 
 {
 	GENERATED_BODY()
 
 public:
 	ABoss();
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override; 
 
 	virtual void Hit_Implementation(FAttackInfo AttackInfo) override; 
+	virtual void Interaction_Implementation(ACharacter* OtherCharacter) override;
 
+	UFUNCTION(BlueprintCallable) 
+	void SetAttackState(bool State);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure) 
+	FVector GetPlayerAround(float Distance); 
+
+	UFUNCTION(BlueprintCallable) 
+	void CatchPlayer(FName SocketName); 
+	UFUNCTION(BlueprintCallable) 
+	void ReleasePlayer(); 
+
+	UFUNCTION(BlueprintCallable) 
+	void LaunchPlayer(FVector Dir, float Force); 
+	UFUNCTION(BlueprintCallable, BlueprintPure) 
+	FVector GetFistSwingDir(); 
+	UFUNCTION(BlueprintCallable, BlueprintPure) 
+	FVector GetShoulderDir(); 
+
+	UPROPERTY()
+	TObjectPtr<class UBlackboardComponent> Blackboard; 
+	UPROPERTY() 
+	TObjectPtr<ACharacter> Player; 
+
+	UPROPERTY(EditAnywhere, Category = Materials) 
+	TObjectPtr<UMaterialInterface> M_Default; 
+	UPROPERTY(EditAnywhere, Category = Materials)
+	TObjectPtr<UMaterialInterface> M_Attack; 
+
+	UPROPERTY() 
+	TObjectPtr<UStaticMeshComponent> TMesh; 
 
 private: 
+	FVector GetBossToPlayerDir(); 
+	FVector GetCatchThrowDir();  
+
 	UPROPERTY(EditAnywhere, Category = Stat)  
 	float MaxHP; 
 	UPROPERTY(EditAnywhere, Category = Stat)  
@@ -28,7 +63,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Widget) 
 	TSubclassOf<class UBossUI> BossInfoWidget; 
-	
 	UPROPERTY()
 	TObjectPtr<UUserWidget> BossInfoObject; 
+
+	UPROPERTY() 
+	TObjectPtr<class UBoxComponent> AttackCollider; 
+
+	bool IsPhase2; 
+
 };

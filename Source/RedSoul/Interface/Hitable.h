@@ -12,7 +12,10 @@ struct FAttackInfo {
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Damage;
+	float Damage; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool Stun;
+
 };
 
 UINTERFACE(MinimalAPI)
@@ -27,6 +30,6 @@ class REDSOUL_API IHitable
 
 public: 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent) 
-	void Hit(FAttackInfo AttackInfo);
+	void Hit(FAttackInfo AttackInfo); 
 
 };

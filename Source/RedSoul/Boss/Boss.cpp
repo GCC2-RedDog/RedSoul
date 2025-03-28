@@ -3,6 +3,10 @@
 
 #include "Boss.h" 
 #include "BossUI.h" 
+#include "AIC_Boss.h" 
+#include "BehaviorTree/BlackboardComponent.h" 
+#include "Components/BoxComponent.h" 
+#include "GameFramework/CharacterMovementComponent.h" 
 
 ABoss::ABoss()
 {
@@ -12,8 +16,12 @@ ABoss::ABoss()
 
 void ABoss::BeginPlay() 
 {
-	Super::BeginPlay();
-	
+	Super::BeginPlay(); 
+
+	AttackCollider = FindComponentByClass<UBoxComponent>(); 
+
+	TMesh = FindComponentByClass<UStaticMeshComponent>(); 
+
 	BossInfoObject = CreateWidget<UBossUI>(GetWorld(), BossInfoWidget); 
 	BossInfoObject->AddToViewport(); 
 	Cast<UBossUI>(BossInfoObject)->SetHPBar(CurHP / MaxHP); 
@@ -23,6 +31,16 @@ void ABoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime); 
 
+	if (Player && Blackboard) { 
+		float Distance = (GetActorLocation() - Player->GetActorLocation()).Length();
+		Blackboard->SetValueAsFloat("BossToPlayerDistance", Distance);
+	} 
+
+	if (!IsPhase2 && CurHP <= MaxHP * 3 / 10.0f) { 
+		IsPhase2 = true; 
+		Blackboard->SetValueAsBool("IsPhase2", true); 
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Phase 2")); 
+	}
 }
 
 void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
@@ -34,4 +52,71 @@ void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 	if (CurHP <= 0) {
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Boss Die")); 
 	}
+}
+
+void ABoss::Interaction_Implementation(ACharacter* OtherCharacter)
+{ 
+	Cast<AAIC_Boss>(GetController())->Awaken(OtherCharacter); 
+}
+
+void ABoss::SetAttackState(bool State)
+{ 
+	TMesh->SetMaterial(0, State ? M_Attack : M_Default); 
+	AttackCollider->SetGenerateOverlapEvents(State); 
+} 
+
+FVector ABoss::GetPlayerAround(float Distance)
+{
+	return Player->GetActorLocation() - GetBossToPlayerDir() * Distance; 
+} 
+
+void ABoss::CatchPlayer(FName SocketName)
+{ 
+	Player->AttachToComponent(TMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName); 
+	
+	if (auto AIC = Cast<AAIC_Boss>(GetController())) {
+		AIC->ClearFocus(2); 
+	} 
+
+	Player->GetComponentByClass<UCharacterMovementComponent>()->GravityScale = 0.0f; 
+	Player->GetComponentByClass<UCharacterMovementComponent>()->MaxWalkSpeed = 0.0f; 
+}
+
+void ABoss::ReleasePlayer()
+{ 
+	Player->GetComponentByClass<UCharacterMovementComponent>()->GravityScale = 1.0f; 
+	Player->GetComponentByClass<UCharacterMovementComponent>()->MaxWalkSpeed = 500.0f;
+
+	Player->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform); 
+
+	LaunchPlayer(GetCatchThrowDir(), 1500.0f); 
+}
+
+void ABoss::LaunchPlayer(FVector Dir, float Force)
+{ 
+	Player->LaunchCharacter(Dir * Force, false, false); 
+}
+
+FVector ABoss::GetFistSwingDir()
+{ 
+	return AttackCollider->GetForwardVector() + FVector(0, 0, 0.1f); 
+}
+
+FVector ABoss::GetShoulderDir()
+{
+	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.1f)) * 1750.0f; 
+}
+
+FVector ABoss::GetCatchThrowDir()
+{ 
+	return GetBossToPlayerDir() - FVector(0.0f, 0.0f, 0.65f); 
+}
+
+FVector ABoss::GetBossToPlayerDir()
+{
+	FVector Dir = Player->GetActorLocation() - GetActorLocation(); 
+	Dir.Z = 0.0f; 
+	Dir.Normalize();
+
+	return Dir;
 }
