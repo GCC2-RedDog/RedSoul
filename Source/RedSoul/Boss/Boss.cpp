@@ -20,7 +20,7 @@ void ABoss::BeginPlay()
 
 	AttackCollider = FindComponentByClass<UBoxComponent>(); 
 
-	TMesh = FindComponentByClass<UStaticMeshComponent>(); 
+	BossMesh = FindComponentByClass<USkeletalMeshComponent>(); 
 
 	BossInfoObject = CreateWidget<UBossUI>(GetWorld(), BossInfoWidget); 
 	BossInfoObject->AddToViewport(); 
@@ -64,7 +64,6 @@ void ABoss::Interaction_Implementation(ACharacter* OtherCharacter)
 
 void ABoss::SetAttackState(bool State)
 { 
-	TMesh->SetMaterial(0, State ? M_Attack : M_Default); 
 	AttackCollider->SetGenerateOverlapEvents(State); 
 } 
 
@@ -75,7 +74,7 @@ FVector ABoss::GetPlayerAround(float Distance)
 
 void ABoss::CatchPlayer(FName SocketName)
 { 
-	Player->AttachToComponent(TMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName); 
+	Player->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName); 
 	
 	if (auto AIC = Cast<AAIC_Boss>(GetController())) {
 		AIC->ClearFocus(2); 
@@ -110,13 +109,6 @@ FVector ABoss::GetShoulderDir()
 	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.1f)) * 1500.0f; 
 }
 
-void ABoss::Die()
-{ 
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Boss Die")); 
-
-	Destroy(); 
-}
-
 FVector ABoss::GetCatchThrowDir()
 { 
 	return GetBossToPlayerDir() - FVector(0.0f, 0.0f, 0.65f); 
@@ -130,3 +122,10 @@ FVector ABoss::GetBossToPlayerDir()
 
 	return Dir;
 }
+
+void ABoss::Die()
+{ 
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Boss Die")); 
+
+	Destroy(); 
+} 

@@ -44,14 +44,6 @@ public:
 	UPROPERTY() 
 	TObjectPtr<ACharacter> Player; 
 
-	UPROPERTY(EditAnywhere, Category = Materials) 
-	TObjectPtr<UMaterialInterface> M_Default; 
-	UPROPERTY(EditAnywhere, Category = Materials)
-	TObjectPtr<UMaterialInterface> M_Attack; 
-
-	UPROPERTY() 
-	TObjectPtr<UStaticMeshComponent> TMesh; 
-
 private: 
 	FVector GetBossToPlayerDir(); 
 	FVector GetCatchThrowDir();  
@@ -62,6 +54,9 @@ private:
 	float MaxHP; 
 	UPROPERTY(EditAnywhere, Category = Stat)  
 	float CurHP; 
+
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> BossMesh;
 
 	UPROPERTY(EditAnywhere, Category = Widget) 
 	TSubclassOf<class UBossUI> BossInfoWidget; 
