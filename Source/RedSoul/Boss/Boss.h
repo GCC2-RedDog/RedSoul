@@ -55,6 +55,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite) 
 	bool IsJumpAttacking; 
+	
+	EAttackType AttackType; 
 
 private: 
 	UFUNCTION()
@@ -89,8 +91,6 @@ private:
 	bool IsPhase2; 
 
 	bool IsExecuteJumpAttack; 
-	
-	EAttackType AttackType; 
 
 	FTimerHandle JumpAttackTimerHandle; 
 	FTimerHandle CatchTimerHandle; 

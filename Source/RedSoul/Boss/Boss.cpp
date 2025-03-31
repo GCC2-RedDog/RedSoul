@@ -69,10 +69,10 @@ void ABoss::Interaction_Implementation(ACharacter* OtherCharacter)
 
 void ABoss::SetAttackState(UShapeComponent* Collider, bool State)
 { 
-	Collider->SetGenerateOverlapEvents(State); 
+	HandAttackCollider->SetGenerateOverlapEvents(State); 
 	SetActorLocation(GetActorLocation() + FVector(0.1f, 0, 0)); 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, State ? TEXT("AttackStart") : TEXT("AttackEnd")); 
-	TempMesh->SetMaterial(0, State ? M_Attacking : M_Default);
+	//TempMesh->SetMaterial(0, State ? M_Attacking : M_Default);
 } 
 
 FVector ABoss::GetPlayerAround(float Distance)
