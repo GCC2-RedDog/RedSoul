@@ -8,6 +8,17 @@
 #include "../Interface/Interactive.h" 
 #include "Boss.generated.h" 
 
+UENUM(BlueprintType) 
+enum EAttackType { 
+	None	 UMETA(DisplayName = "None"), 
+	Attack1	 UMETA(DisplayName = "Attack1"), 
+	Attack2	 UMETA(DisplayName = "Attack2"), 
+	Attack3	 UMETA(DisplayName = "Attack3"), 
+	Attack4	 UMETA(DisplayName = "Attack4"), 
+	Attack5	 UMETA(DisplayName = "Attack5"), 
+	Attack6	 UMETA(DisplayName = "Attack6") 
+};
+
 UCLASS()
 class REDSOUL_API ABoss : public ACharacter, public IHitable, public IInteractive 
 {
@@ -22,15 +33,10 @@ public:
 	virtual void Interaction_Implementation(ACharacter* OtherCharacter) override;
 
 	UFUNCTION(BlueprintCallable) 
-	void SetAttackState(bool State);
+	void SetAttackState(UShapeComponent* Collider, bool State);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure) 
 	FVector GetPlayerAround(float Distance); 
-
-	UFUNCTION(BlueprintCallable) 
-	void CatchPlayer(FName SocketName); 
-	UFUNCTION(BlueprintCallable) 
-	void ReleasePlayer(); 
 
 	UFUNCTION(BlueprintCallable) 
 	void LaunchPlayer(FVector Dir, float Force); 
@@ -38,17 +44,28 @@ public:
 	FVector GetFistSwingDir(); 
 	UFUNCTION(BlueprintCallable, BlueprintPure) 
 	FVector GetShoulderDir(); 
+
+	UFUNCTION(BlueprintCallable) 
+	void SetAttackType(EAttackType Value); 
 	
 	UPROPERTY()
 	TObjectPtr<class UBlackboardComponent> Blackboard; 
 	UPROPERTY() 
 	TObjectPtr<ACharacter> Player; 
 
-private: 
-	FVector GetBossToPlayerDir(); 
-	FVector GetCatchThrowDir();  
+	UPROPERTY(BlueprintReadWrite) 
+	bool IsJumpAttacking; 
 
+private: 
+	UFUNCTION()
+	void OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
+	void OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
+	
+	void JumpAttackCheck(); 
+	
 	void Die(); 
+
+	FVector GetBossToPlayerDir(); 
 
 	UPROPERTY(EditAnywhere, Category = Stat)  
 	float MaxHP; 
@@ -64,9 +81,28 @@ private:
 	TObjectPtr<UUserWidget> BossInfoObject; 
 
 	UPROPERTY() 
-	TObjectPtr<class UBoxComponent> AttackCollider; 
+	TObjectPtr<class UBoxComponent> HandAttackCollider; 
+	UPROPERTY()
+	TObjectPtr<class USphereComponent> LightningExplosionAttackCollider; 
 
 	bool IsAwake; 
 	bool IsPhase2; 
+
+	bool IsExecuteJumpAttack; 
 	
+	EAttackType AttackType; 
+
+	FTimerHandle JumpAttackTimerHandle; 
+	FTimerHandle CatchTimerHandle; 
+	FTimerHandle ThrowTimerHandle; 
+
+	UPROPERTY(EditAnywhere, Category = Materials) 
+	TObjectPtr<UStaticMeshComponent> TempMesh; 
+ 	UPROPERTY(EditAnywhere, Category = Materials) 
+	TObjectPtr<UMaterialInterface> M_AttackReady; 
+	UPROPERTY(EditAnywhere, Category = Materials)
+	TObjectPtr<UMaterialInterface> M_Attacking;
+	UPROPERTY(EditAnywhere, Category = Materials)
+	TObjectPtr<UMaterialInterface> M_Default;
+
 };
