@@ -6,6 +6,7 @@
 #include "AIC_Boss.h" 
 #include "BehaviorTree/BlackboardComponent.h" 
 #include "Components/BoxComponent.h" 
+#include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h" 
 
 ABoss::ABoss()
@@ -19,9 +20,15 @@ void ABoss::BeginPlay()
 	Super::BeginPlay(); 
 
 	HandAttackCollider = FindComponentByClass<UBoxComponent>(); 
-	HandAttackCollider->OnComponentBeginOverlap.AddDynamic(this, &ABoss::OnHandAttackOverlapBegin); 
+	HandAttackCollider->OnComponentBeginOverlap.AddDynamic(this, &ABoss::OnHandAttackOverlapBegin);
 
-	BossMesh = FindComponentByClass<USkeletalMeshComponent>(); 
+	LightningExplosionAttackCollider = FindComponentByClass<USphereComponent>();
+	LightningExplosionAttackCollider->OnComponentBeginOverlap.AddDynamic(this, &ABoss::OnLightningExplosionAttackOverlapBegin); 
+	
+	BossMesh = FindComponentByClass<USkeletalMeshComponent>();
+
+	TempMesh = Cast<UStaticMeshComponent>(FindComponentByTag(UStaticMeshComponent::StaticClass(), "TempMesh")); 
+	LightningExplosionMesh = Cast<UStaticMeshComponent>(FindComponentByTag(UStaticMeshComponent::StaticClass(), "Lightning")); 
 
 	BossInfoObject = CreateWidget<UBossUI>(GetWorld(), BossInfoWidget); 
 	BossInfoObject->AddToViewport(); 
@@ -37,7 +44,7 @@ void ABoss::Tick(float DeltaTime)
 		Blackboard->SetValueAsFloat("BossToPlayerDistance", Distance);
 	} 
 
-	if (!IsPhase2 && CurHP <= MaxHP * 3 / 10.0f) { 
+	if (!IsPhase2 && CurHP <= MaxHP * 5 / 10.0f) { 
 		IsPhase2 = true; 
 		Blackboard->SetValueAsBool("IsPhase2", true); 
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Phase 2")); 
@@ -67,15 +74,58 @@ void ABoss::Interaction_Implementation(ACharacter* OtherCharacter)
 	Cast<AAIC_Boss>(GetController())->Awaken(OtherCharacter); 
 }
 
-void ABoss::SetAttackState(UShapeComponent* Collider, bool State)
-{ 
-	HandAttackCollider->SetGenerateOverlapEvents(State); 
+void ABoss::Attack(EAttackType Value)
+{
+	AttackType = Value;
+	 
+	switch (Value)
+	{
+	case EAttackType::Attack1: 
+		if (auto AI = BossMesh->GetAnimInstance())
+		{
+			AI->Montage_Play(Attack1_Montage);
+		} 
+		break; 
+	case EAttackType::Attack2:
+		GetController()->StopMovement();
+		
+		break; 
+	case EAttackType::Attack3: 
+		if (auto AI = BossMesh->GetAnimInstance())
+		{
+			AI->Montage_Play(Attack3_Montage);
+		} 
+		break; 
+	case EAttackType::Attack4: 
+		break; 
+	case EAttackType::Attack5: 
+		break; 
+	case EAttackType::Attack6:
+		AttackType = Value;
+		LightningExplosionMesh->SetVisibility(true);
+		LightningExplosionMesh->SetGenerateOverlapEvents(true);
+
+		GetWorld()->GetTimerManager().SetTimer(Attack6TimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			LightningExplosionMesh->SetVisibility(false);
+			LightningExplosionMesh->SetGenerateOverlapEvents(false); 
+			
+			GetWorld()->GetTimerManager().ClearTimer(Attack6TimerHandle); 
+		}), 0.5f, false); 
+		break; 
+	}
+}
+
+void ABoss::SetAttackState(bool IsHandAttack, bool State)
+{
+	if (IsHandAttack) HandAttackCollider->SetGenerateOverlapEvents(State);
+	else LightningExplosionAttackCollider->SetGenerateOverlapEvents(State); 
 	SetActorLocation(GetActorLocation() + FVector(0.1f, 0, 0)); 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, State ? TEXT("AttackStart") : TEXT("AttackEnd")); 
 	//TempMesh->SetMaterial(0, State ? M_Attacking : M_Default);
 } 
 
-FVector ABoss::GetPlayerAround(float Distance)
+FVector ABoss::GetPlayerAround(float Distance) 
 {
 	return Player->GetActorLocation() - GetBossToPlayerDir() * Distance; 
 } 
@@ -149,18 +199,21 @@ void ABoss::OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 
 void ABoss::OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 { 
-
+	if (AttackType == EAttackType::Attack6)
+	{
+		Execute_Hit(Player, { 10, 0 }); 
+	}
 }
 
 void ABoss::JumpAttackCheck()
 { 
 	float Vel = GetVelocity().Length(); 
 	if (Vel <= 0.1f && !IsExecuteJumpAttack) { 
-		SetAttackState(HandAttackCollider, true); 
+		SetAttackState(true, true); 
 		IsExecuteJumpAttack = true; 
 
 		GetWorld()->GetTimerManager().SetTimer(JumpAttackTimerHandle, FTimerDelegate::CreateLambda([&]() {
-			SetAttackState(HandAttackCollider, false); 
+			SetAttackState(true, false); 
 			IsJumpAttacking = false; 
 			IsExecuteJumpAttack = false; 
 
@@ -176,7 +229,7 @@ void ABoss::Die()
 	Destroy(); 
 } 
 
-FVector ABoss::GetBossToPlayerDir()
+FVector ABoss::GetBossToPlayerDir() 
 {
 	FVector Dir = Player->GetActorLocation() - GetActorLocation(); 
 	Dir.Z = 0.0f; 

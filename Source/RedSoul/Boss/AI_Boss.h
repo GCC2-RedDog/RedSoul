@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "Boss_AnimInstance.generated.h"
+#include "AI_Boss.generated.h"
 
 UCLASS()
-class REDSOUL_API UBoss_AnimInstance : public UAnimInstance
+class REDSOUL_API UAI_Boss : public UAnimInstance
 {
 	GENERATED_BODY()
 	
@@ -19,6 +19,6 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	float ZVelocity;
 	UPROPERTY(BlueprintReadOnly) 
-	int AttackType; 
-
+	bool IsPhase2; 
+	
 };

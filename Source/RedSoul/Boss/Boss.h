@@ -32,8 +32,10 @@ public:
 	virtual void Hit_Implementation(FAttackInfo AttackInfo) override; 
 	virtual void Interaction_Implementation(ACharacter* OtherCharacter) override;
 
+	UFUNCTION(BlueprintCallable)
+	void Attack(EAttackType Value); 
 	UFUNCTION(BlueprintCallable) 
-	void SetAttackState(UShapeComponent* Collider, bool State);
+	void SetAttackState(bool IsHandAttack, bool State);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure) 
 	FVector GetPlayerAround(float Distance); 
@@ -56,11 +58,12 @@ public:
 	UPROPERTY(BlueprintReadWrite) 
 	bool IsJumpAttacking; 
 	
-	EAttackType AttackType; 
+	bool IsPhase2; 
 
 private: 
 	UFUNCTION()
 	void OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
+	UFUNCTION()
 	void OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
 	
 	void JumpAttackCheck(); 
@@ -75,7 +78,7 @@ private:
 	float CurHP; 
 
 	UPROPERTY()
-	TObjectPtr<USkeletalMeshComponent> BossMesh;
+	TObjectPtr<USkeletalMeshComponent> BossMesh; 
 
 	UPROPERTY(EditAnywhere, Category = Widget) 
 	TSubclassOf<class UBossUI> BossInfoWidget; 
@@ -88,13 +91,21 @@ private:
 	TObjectPtr<class USphereComponent> LightningExplosionAttackCollider; 
 
 	bool IsAwake; 
-	bool IsPhase2; 
 
 	bool IsExecuteJumpAttack; 
 
+	EAttackType AttackType;
+	
+	FTimerHandle Attack6TimerHandle; 
+	
 	FTimerHandle JumpAttackTimerHandle; 
 	FTimerHandle CatchTimerHandle; 
-	FTimerHandle ThrowTimerHandle; 
+	FTimerHandle ThrowTimerHandle;
+
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<UAnimMontage> Attack1_Montage;
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<UAnimMontage> Attack3_Montage; 
 
 	UPROPERTY(EditAnywhere, Category = Materials) 
 	TObjectPtr<UStaticMeshComponent> TempMesh; 
@@ -104,5 +115,7 @@ private:
 	TObjectPtr<UMaterialInterface> M_Attacking;
 	UPROPERTY(EditAnywhere, Category = Materials)
 	TObjectPtr<UMaterialInterface> M_Default;
-
+	UPROPERTY(EditAnywhere, Category = materials)
+	TObjectPtr<UStaticMeshComponent> LightningExplosionMesh; 
+	
 };

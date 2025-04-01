@@ -75,3 +75,5 @@ DerivedDataCache/*
 
 Content/Assets/*
 Content/ParagonRampage/* 
+
+.idea/*
