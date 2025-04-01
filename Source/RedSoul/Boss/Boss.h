@@ -95,7 +95,9 @@ private:
 	bool IsExecuteJumpAttack; 
 
 	EAttackType AttackType;
-	
+
+	FTimerHandle Attack4TimerHandle; 
+	FTimerHandle Attack5TimerHandle; 
 	FTimerHandle Attack6TimerHandle; 
 	
 	FTimerHandle JumpAttackTimerHandle; 

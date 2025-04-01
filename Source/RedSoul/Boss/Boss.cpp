@@ -96,9 +96,24 @@ void ABoss::Attack(EAttackType Value)
 			AI->Montage_Play(Attack3_Montage);
 		} 
 		break; 
-	case EAttackType::Attack4: 
+	case EAttackType::Attack4:
+		LaunchCharacter(GetShoulderDir(), false, false);
+		SetAttackState(true, true);
+		GetWorld()->GetTimerManager().SetTimer(Attack4TimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			SetAttackState(true, false); 
+			
+			GetWorld()->GetTimerManager().ClearTimer(Attack4TimerHandle); 
+		}), 0.5f, false); 
 		break; 
-	case EAttackType::Attack5: 
+	case EAttackType::Attack5:
+		SetAttackState(true, true);
+		GetWorld()->GetTimerManager().SetTimer(Attack5TimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			SetAttackState(true, false); 
+			
+			GetWorld()->GetTimerManager().ClearTimer(Attack5TimerHandle); 
+		}), 0.5f, false); 
 		break; 
 	case EAttackType::Attack6:
 		AttackType = Value;
