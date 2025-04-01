@@ -20,5 +20,7 @@ public:
 	float ZVelocity;
 	UPROPERTY(BlueprintReadOnly) 
 	bool IsPhase2; 
+	UPROPERTY(BlueprintReadWrite) 
+	bool IsActiveAttack2; 
 	
 };

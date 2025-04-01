@@ -59,6 +59,7 @@ public:
 	bool IsJumpAttacking; 
 	
 	bool IsPhase2; 
+	EAttackType AttackType; 
 
 private: 
 	UFUNCTION()
@@ -93,8 +94,6 @@ private:
 	bool IsAwake; 
 
 	bool IsExecuteJumpAttack; 
-
-	EAttackType AttackType;
 
 	FTimerHandle Attack4TimerHandle; 
 	FTimerHandle Attack5TimerHandle; 

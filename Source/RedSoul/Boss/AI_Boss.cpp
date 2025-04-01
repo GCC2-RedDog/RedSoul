@@ -6,10 +6,17 @@
 
 void UAI_Boss::NativeUpdateAnimation(float DeltaSeconds)
 { 
-	if (auto* boss = Cast<ABoss>(GetOwningActor())) {
-		Velocity = boss->GetVelocity().Length(); 
-		ZVelocity = boss->GetVelocity().Z; 
-		IsPhase2 = boss->IsPhase2;
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, IsPhase2 ? TEXT("True") : TEXT("False"));
+	if (auto* Boss = Cast<ABoss>(GetOwningActor())) {
+		Velocity = Boss->GetVelocity().Length(); 
+		ZVelocity = Boss->GetVelocity().Z; 
+		IsPhase2 = Boss->IsPhase2; 
+		
+		if (IsActiveAttack2) {
+			IsActiveAttack2 = !(ZVelocity == 0); 
+		}
+
+		if (Boss->AttackType == EAttackType::Attack2) {
+			IsActiveAttack2 = true; 
+		} 
 	}
 }
