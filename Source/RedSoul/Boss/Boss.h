@@ -42,36 +42,27 @@ public:
 
 	UFUNCTION(BlueprintCallable) 
 	void LaunchPlayer(FVector Dir, float Force); 
-	UFUNCTION(BlueprintCallable, BlueprintPure) 
-	FVector GetFistSwingDir(); 
-	UFUNCTION(BlueprintCallable, BlueprintPure) 
-	FVector GetShoulderDir(); 
-
-	UFUNCTION(BlueprintCallable) 
-	void SetAttackType(EAttackType Value); 
-	
 	UPROPERTY()
 	TObjectPtr<class UBlackboardComponent> Blackboard; 
 	UPROPERTY() 
 	TObjectPtr<ACharacter> Player; 
-
-	UPROPERTY(BlueprintReadWrite) 
-	bool IsJumpAttacking; 
 	
-	bool IsPhase2; 
-	EAttackType AttackType; 
+	bool IsPhase2;
+	bool IsActiveAttack2; 
 
+	FVector GetShoulderDir();
+	
 private: 
 	UFUNCTION()
 	void OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
 	UFUNCTION()
 	void OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
 	
-	void JumpAttackCheck(); 
-	
 	void Die(); 
 
 	FVector GetBossToPlayerDir(); 
+	FVector GetFistSwingDir(); 
+	FVector GetThrowPlayerDir(); 
 
 	UPROPERTY(EditAnywhere, Category = Stat)  
 	float MaxHP; 
@@ -93,20 +84,23 @@ private:
 
 	bool IsAwake; 
 
-	bool IsExecuteJumpAttack; 
-
+	EAttackType AttackType;
+	
+	
+	FTimerHandle Attack2TimerHandle; 
 	FTimerHandle Attack4TimerHandle; 
 	FTimerHandle Attack5TimerHandle; 
 	FTimerHandle Attack6TimerHandle; 
 	
-	FTimerHandle JumpAttackTimerHandle; 
 	FTimerHandle CatchTimerHandle; 
 	FTimerHandle ThrowTimerHandle;
 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<UAnimMontage> Attack1_Montage;
 	UPROPERTY(EditAnywhere, Category = Montages)
-	TObjectPtr<UAnimMontage> Attack3_Montage; 
+	TObjectPtr<UAnimMontage> Attack3_Montage;
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<UAnimMontage> Attack4_Montage; 
 
 	UPROPERTY(EditAnywhere, Category = Materials) 
 	TObjectPtr<UStaticMeshComponent> TempMesh; 

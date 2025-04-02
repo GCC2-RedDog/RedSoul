@@ -14,8 +14,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Damage; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Stun;
-
+	bool Stun; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float StunTime; 
+	
 };
 
 UINTERFACE(MinimalAPI)

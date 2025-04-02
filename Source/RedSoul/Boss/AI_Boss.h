@@ -17,10 +17,10 @@ public:
 	UPROPERTY(BlueprintReadOnly) 
 	float Velocity; 
 	UPROPERTY(BlueprintReadOnly)
-	float ZVelocity;
+	bool IsFalling;
 	UPROPERTY(BlueprintReadOnly) 
 	bool IsPhase2; 
-	UPROPERTY(BlueprintReadWrite) 
+	UPROPERTY(BlueprintReadOnly) 
 	bool IsActiveAttack2; 
 	
 };

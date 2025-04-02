@@ -8,15 +8,10 @@ void UAI_Boss::NativeUpdateAnimation(float DeltaSeconds)
 { 
 	if (auto* Boss = Cast<ABoss>(GetOwningActor())) {
 		Velocity = Boss->GetVelocity().Length(); 
-		ZVelocity = Boss->GetVelocity().Z; 
-		IsPhase2 = Boss->IsPhase2; 
-		
-		if (IsActiveAttack2) {
-			IsActiveAttack2 = !(ZVelocity == 0); 
-		}
 
-		if (Boss->AttackType == EAttackType::Attack2) {
-			IsActiveAttack2 = true; 
-		} 
+		IsActiveAttack2 = Boss->IsActiveAttack2; 
+		IsFalling = !(Boss->GetVelocity().Z); 
+		
+		IsPhase2 = Boss->IsPhase2; 
 	}
 }
