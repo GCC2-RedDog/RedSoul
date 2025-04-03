@@ -14,14 +14,14 @@ void AAIC_Boss::OnPossess(APawn* InPawn)
 
 void AAIC_Boss::SetBlackboard(ACharacter* OtherCharacter)
 {
-	Boss->Blackboard = GetBlackboardComponent(); 
-	Boss->Player = OtherCharacter; 
+	Boss->Blackboard = GetBlackboardComponent();
+	Blackboard->SetValueAsObject("Player", OtherCharacter); 
 } 
 
 void AAIC_Boss::Awaken(ACharacter* OtherCharacter)
 { 
 	RunBehaviorTree(BT); 
 	SetBlackboard(OtherCharacter); 
-	Blackboard->SetValueAsObject("Player", OtherCharacter); 
+	
 }
 

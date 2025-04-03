@@ -2,16 +2,18 @@
 
 
 #include "AI_Boss.h" 
-#include "Boss.h" 
 
 void UAI_Boss::NativeUpdateAnimation(float DeltaSeconds)
 { 
-	if (auto* Boss = Cast<ABoss>(GetOwningActor())) {
-		Velocity = Boss->GetVelocity().Length(); 
-
+	if (auto Boss = Cast<ABoss>(GetOwningActor())) {
+		IsTurnLeft = Boss->IsTurnLeft;
+		DeltaRotAngle = Boss->DeltaRotAngle; 
+		
 		IsActiveAttack2 = Boss->IsActiveAttack2; 
 		IsFalling = !(Boss->GetVelocity().Z); 
 		
-		IsPhase2 = Boss->IsPhase2; 
+		IsPhase2 = Boss->IsPhase2;
+
+		IsDie = Boss->IsDie; 
 	}
 }

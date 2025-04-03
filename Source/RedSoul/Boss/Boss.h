@@ -47,10 +47,19 @@ public:
 	UPROPERTY() 
 	TObjectPtr<ACharacter> Player; 
 	
-	bool IsPhase2;
+	bool IsAwake; 
 	bool IsActiveAttack2; 
+	bool IsPhase2;
+	bool IsDie;
+	
+	bool IsTurnLeft; 
+	float DeltaRotAngle;
+	FVector PreForward;
 
 	FVector GetShoulderDir();
+
+	UPROPERTY(EditAnywhere, Category = Temp)
+	TObjectPtr<UStaticMeshComponent> LightningExplosionMesh;
 	
 private: 
 	UFUNCTION()
@@ -82,10 +91,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<class USphereComponent> LightningExplosionAttackCollider; 
 
-	bool IsAwake; 
-
 	EAttackType AttackType;
 	
+	FTimerHandle AwakeTimerHandle;
 	
 	FTimerHandle Attack2TimerHandle; 
 	FTimerHandle Attack4TimerHandle; 
@@ -96,21 +104,15 @@ private:
 	FTimerHandle ThrowTimerHandle;
 
 	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<UAnimMontage> Awake_Montage;
+	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<UAnimMontage> Attack1_Montage;
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<UAnimMontage> Attack3_Montage;
 	UPROPERTY(EditAnywhere, Category = Montages)
-	TObjectPtr<UAnimMontage> Attack4_Montage; 
-
-	UPROPERTY(EditAnywhere, Category = Materials) 
-	TObjectPtr<UStaticMeshComponent> TempMesh; 
- 	UPROPERTY(EditAnywhere, Category = Materials) 
-	TObjectPtr<UMaterialInterface> M_AttackReady; 
-	UPROPERTY(EditAnywhere, Category = Materials)
-	TObjectPtr<UMaterialInterface> M_Attacking;
-	UPROPERTY(EditAnywhere, Category = Materials)
-	TObjectPtr<UMaterialInterface> M_Default;
-	UPROPERTY(EditAnywhere, Category = materials)
-	TObjectPtr<UStaticMeshComponent> LightningExplosionMesh; 
-	
+	TObjectPtr<UAnimMontage> Attack4_Montage;
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<UAnimMontage> Attack6_Montage;
+	UPROPERTY(EditAnywhere, Category = Montages) 
+	TObjectPtr<UAnimMontage> Hit_Montage; 
 };

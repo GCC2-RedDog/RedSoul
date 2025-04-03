@@ -4,6 +4,7 @@
 #include "Boss.h" 
 #include "BossUI.h" 
 #include "AIC_Boss.h" 
+#include "BrainComponent.h"
 #include "BehaviorTree/BlackboardComponent.h" 
 #include "Components/BoxComponent.h" 
 #include "Components/SphereComponent.h"
@@ -28,12 +29,13 @@ void ABoss::BeginPlay()
 	
 	BossMesh = FindComponentByClass<USkeletalMeshComponent>();
 
-	TempMesh = Cast<UStaticMeshComponent>(FindComponentByTag(UStaticMeshComponent::StaticClass(), "TempMesh")); 
 	LightningExplosionMesh = Cast<UStaticMeshComponent>(FindComponentByTag(UStaticMeshComponent::StaticClass(), "Lightning")); 
 
 	BossInfoObject = CreateWidget<UBossUI>(GetWorld(), BossInfoWidget); 
 	BossInfoObject->AddToViewport(); 
-	Cast<UBossUI>(BossInfoObject)->SetHPBar(CurHP / MaxHP); 
+	Cast<UBossUI>(BossInfoObject)->SetHPBar(CurHP / MaxHP);
+
+	PreForward = GetActorForwardVector(); 
 }
 
 void ABoss::Tick(float DeltaTime)
@@ -43,32 +45,67 @@ void ABoss::Tick(float DeltaTime)
 	if (Player && Blackboard) { 
 		float Distance = (GetActorLocation() - Player->GetActorLocation()).Length();
 		Blackboard->SetValueAsFloat("BossToPlayerDistance", Distance);
-	} 
+	}
 
-	if (!IsPhase2 && CurHP <= MaxHP * 5 / 10.0f) { 
-		IsPhase2 = true; 
-		Blackboard->SetValueAsBool("IsPhase2", true); 
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Phase 2")); 
+	FVector CurForward = GetActorForwardVector();
+	if (CurForward != PreForward)
+	{
+		DeltaRotAngle = acosf(CurForward.Dot(PreForward)) * 180 / PI;  
+		IsTurnLeft = !(PreForward.Cross(CurForward).Z > 0);   
+		PreForward = CurForward;
 	} 
+	else
+	{
+		DeltaRotAngle = 0; 
+	}
 }
 
 void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 { 
-	if (IsAwake) {
+	if (IsAwake && !IsDie) { 
 		CurHP -= AttackInfo.Damage;
 		Cast<UBossUI>(BossInfoObject)->SetHPBar(CurHP / MaxHP);
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Boss Hit %f"), CurHP));
 
-		if (CurHP <= 0) {
+		SetAttackState(true, false); 
+		
+		if (AttackType == EAttackType::None)
+		{
+			if (auto AI = BossMesh->GetAnimInstance())
+			{
+				AI->Montage_Play(Hit_Montage); 
+			}
+		}
+
+		if (!IsPhase2 && CurHP <= MaxHP * 5 / 10.0f) { 
+			IsPhase2 = true; 
+			Blackboard->SetValueAsBool("IsPhase2", true); 
+			GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Phase 2")); 
+		} 
+		
+		if (CurHP <= 0) { 
+			IsDie = true; 
 			Die();
 		}
 	} 
 }
 
 void ABoss::Interaction_Implementation(ACharacter* OtherCharacter)
-{ 
-	IsAwake = true; 
-	Cast<AAIC_Boss>(GetController())->Awaken(OtherCharacter); 
+{
+	if (auto AI = BossMesh->GetAnimInstance())
+	{
+		AI->Montage_Play(Awake_Montage);
+	}
+
+	Player = OtherCharacter; 
+
+	GetWorld()->GetTimerManager().SetTimer(AwakeTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		IsAwake = true; 
+		Cast<AAIC_Boss>(GetController())->Awaken(Player);
+
+		GetWorld()->GetTimerManager().ClearTimer(AwakeTimerHandle); 
+	}), 4.5f, false); 
 }
 
 void ABoss::Attack(EAttackType Value)
@@ -128,28 +165,23 @@ void ABoss::Attack(EAttackType Value)
 		}), 0.5f, false); 
 		break; 
 	case EAttackType::Attack6:
-		AttackType = Value;
-		LightningExplosionMesh->SetVisibility(true);
-		SetAttackState(false, true); 
-
-		GetWorld()->GetTimerManager().SetTimer(Attack6TimerHandle, FTimerDelegate::CreateLambda([&]()
+		if (auto AI = BossMesh->GetAnimInstance())
 		{
-			LightningExplosionMesh->SetVisibility(false);
-			SetAttackState(false, false); 
-			
-			GetWorld()->GetTimerManager().ClearTimer(Attack6TimerHandle); 
-		}), 0.5f, false); 
+			AI->Montage_Play(Attack6_Montage); 
+		} 
 		break; 
 	}
 }
 
 void ABoss::SetAttackState(bool IsHandAttack, bool State)
 {
+	if (!State) AttackType = EAttackType::None;
+	
 	if (IsHandAttack) HandAttackCollider->SetGenerateOverlapEvents(State);
 	else LightningExplosionAttackCollider->SetGenerateOverlapEvents(State); 
-	SetActorLocation(GetActorLocation() + FVector(0.1f, 0, 0)); 
+	SetActorLocation(GetActorLocation() + FVector(0.1f, 0, 0));
+	
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, State ? TEXT("AttackStart") : TEXT("AttackEnd")); 
-	//TempMesh->SetMaterial(0, State ? M_Attacking : M_Default);
 } 
 
 FVector ABoss::GetPlayerAround(float Distance) 
@@ -220,7 +252,11 @@ void ABoss::Die()
 { 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Boss Die")); 
 
-	Destroy(); 
+	if (auto AIC = Cast<AAIC_Boss>(GetController())) 
+	{
+		AIC->ClearFocus(2); 
+		AIC->GetBrainComponent()->StopLogic(TEXT("Die")); 
+	}
 } 
 
 FVector ABoss::GetBossToPlayerDir() 
@@ -239,7 +275,7 @@ FVector ABoss::GetFistSwingDir()
 
 FVector ABoss::GetShoulderDir()
 {
-	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.1f)) * 1500.0f; 
+	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.05f)) * 3000.0f; 
 }
 
 FVector ABoss::GetThrowPlayerDir()
