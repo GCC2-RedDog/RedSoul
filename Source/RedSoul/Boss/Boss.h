@@ -72,6 +72,7 @@ private:
 	FVector GetBossToPlayerDir(); 
 	FVector GetFistSwingDir(); 
 	FVector GetThrowPlayerDir(); 
+	FVector GetShoulderHitDir(); 
 
 	UPROPERTY(EditAnywhere, Category = Stat)  
 	float MaxHP; 

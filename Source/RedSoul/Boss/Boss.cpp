@@ -198,20 +198,21 @@ void ABoss::OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 { 
 	switch (AttackType) {
 	case EAttackType::Attack1:
-		Execute_Hit(Player, { 10, false, 0 });
+		Execute_Hit(Player, { IsPhase2 ? 10.0f : 15.0f, false, 0 });
 		break;
 	case EAttackType::Attack2:
 		Execute_Hit(Player, { 10, false, 0 }); 
 		break;
 	case EAttackType::Attack3:
-		Execute_Hit(Player, { 10, true, 2 });
+		Execute_Hit(Player, { IsPhase2 ? 10.0f : 15.0f, true, 2 });
 		LaunchPlayer(GetFistSwingDir(), 2000.0f);
 		break;
 	case EAttackType::Attack4:
 		Execute_Hit(Player, { 10, false,  0 }); 
+		LaunchPlayer(GetShoulderHitDir(), 750.0f); 
 		break;
 	case EAttackType::Attack5:
-		if (auto AIC = Cast<AAIC_Boss>(GetController())) {
+		if (auto AIC = Cast<AAIC_Boss>(GetController())) { 
 			AIC->ClearFocus(2);
 		}
 		
@@ -281,4 +282,9 @@ FVector ABoss::GetShoulderDir()
 FVector ABoss::GetThrowPlayerDir()
 {
 	return GetBossToPlayerDir() - FVector(0.0f, 0.0f, 0.65f); 
+}
+
+FVector ABoss::GetShoulderHitDir()
+{
+	return GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.2f); 
 }
