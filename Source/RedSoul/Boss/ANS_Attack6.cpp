@@ -11,7 +11,7 @@ void UANS_Attack6::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 	if (Boss = Cast<ABoss>(MeshComp->GetOwner()))
 	{
 		Boss->LightningExplosionMesh->SetVisibility(true); 
-		Boss->SetAttackState(false, true); 
+		Boss->SetAttackState(AH_None, false, true); 
 	}
 }
 
@@ -23,6 +23,6 @@ void UANS_Attack6::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	if (Boss)
 	{
 		Boss->LightningExplosionMesh->SetVisibility(false); 
-		Boss->SetAttackState(false, false); 
+		Boss->SetAttackState(AH_None, false, false); 
 	}
 }

@@ -10,6 +10,9 @@ void UAI_Boss::NativeUpdateAnimation(float DeltaSeconds)
 		DeltaRotAngle = Boss->DeltaRotAngle; 
 		
 		IsActiveAttack2 = Boss->IsActiveAttack2; 
+		IsActiveAttack5 = Boss->IsActiveAttack5;
+		IsAttack5Success = Boss->IsAttack5Success; 
+		
 		IsFalling = !(Boss->GetVelocity().Z); 
 		
 		IsPhase2 = Boss->IsPhase2;

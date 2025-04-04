@@ -26,6 +26,10 @@ public:
 	UPROPERTY(BlueprintReadOnly) 
 	bool IsActiveAttack2;
 	UPROPERTY(BlueprintReadOnly) 
+	bool IsActiveAttack5;
+	UPROPERTY(BlueprintReadOnly) 
+	bool IsAttack5Success;
+	UPROPERTY(BlueprintReadOnly) 
 	bool IsDie;
 	
 };

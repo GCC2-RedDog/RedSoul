@@ -10,14 +10,22 @@
 
 UENUM(BlueprintType) 
 enum EAttackType { 
-	None	 UMETA(DisplayName = "None"), 
-	Attack1	 UMETA(DisplayName = "Attack1"), 
-	Attack2	 UMETA(DisplayName = "Attack2"), 
-	Attack3	 UMETA(DisplayName = "Attack3"), 
-	Attack4	 UMETA(DisplayName = "Attack4"), 
-	Attack5	 UMETA(DisplayName = "Attack5"), 
-	Attack6	 UMETA(DisplayName = "Attack6") 
+	AT_None	 UMETA(DisplayName = "None"), 
+	AT_Attack1	 UMETA(DisplayName = "Attack1"), 
+	AT_Attack2	 UMETA(DisplayName = "Attack2"), 
+	AT_Attack3	 UMETA(DisplayName = "Attack3"), 
+	AT_Attack4	 UMETA(DisplayName = "Attack4"), 
+	AT_Attack5	 UMETA(DisplayName = "Attack5"), 
+	AT_Attack6	 UMETA(DisplayName = "Attack6") 
 };
+
+UENUM(BlueprintType) 
+enum EAttackHand { 
+	AH_None		UMETA(DisplayName = "None"), 
+	AH_Center	UMETA(DisplayName = "Center"),
+	AH_Left		UMETA(DisplayName = "Left"), 
+	AH_Right	UMETA(DisplayName = "Right") 
+}; 
 
 UCLASS()
 class REDSOUL_API ABoss : public ACharacter, public IHitable, public IInteractive 
@@ -35,28 +43,35 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Attack(EAttackType Value); 
 	UFUNCTION(BlueprintCallable) 
-	void SetAttackState(bool IsHandAttack, bool State);
-
+	void SetAttackState(EAttackHand Hand, bool IsHandAttack, bool State); 
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure) 
 	FVector GetPlayerAround(float Distance); 
-
 	UFUNCTION(BlueprintCallable) 
-	void LaunchPlayer(FVector Dir, float Force); 
+	void LaunchPlayer(FVector Dir, float Force);
+
+	FVector GetShoulderDir(); 
+	
+	void PlayerCatch(); 
+	void PlayerThrow();
+
+	void SetBlockToPlayer(bool State); 
+	
 	UPROPERTY()
 	TObjectPtr<class UBlackboardComponent> Blackboard; 
 	UPROPERTY() 
 	TObjectPtr<ACharacter> Player; 
 	
 	bool IsAwake; 
-	bool IsActiveAttack2; 
+	bool IsActiveAttack2;
+	bool IsActiveAttack5;
+	bool IsAttack5Success; 
 	bool IsPhase2;
 	bool IsDie;
 	
 	bool IsTurnLeft; 
 	float DeltaRotAngle;
 	FVector PreForward;
-
-	FVector GetShoulderDir();
 
 	UPROPERTY(EditAnywhere, Category = Temp)
 	TObjectPtr<UStaticMeshComponent> LightningExplosionMesh;
@@ -101,7 +116,6 @@ private:
 	FTimerHandle Attack5TimerHandle; 
 	FTimerHandle Attack6TimerHandle; 
 	
-	FTimerHandle CatchTimerHandle; 
 	FTimerHandle ThrowTimerHandle;
 
 	UPROPERTY(EditAnywhere, Category = Montages)
@@ -111,7 +125,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<UAnimMontage> Attack3_Montage;
 	UPROPERTY(EditAnywhere, Category = Montages)
-	TObjectPtr<UAnimMontage> Attack4_Montage;
+	TObjectPtr<UAnimMontage> Attack4_Montage; 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<UAnimMontage> Attack6_Montage;
 	UPROPERTY(EditAnywhere, Category = Montages) 
