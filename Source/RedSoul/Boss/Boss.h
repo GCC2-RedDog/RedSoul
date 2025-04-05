@@ -56,6 +56,9 @@ public:
 	void PlayerThrow();
 
 	void SetBlockToPlayer(bool State); 
+
+	UFUNCTION(BlueprintCallable) 
+	void FocusToPlayer(); 
 	
 	UPROPERTY()
 	TObjectPtr<class UBlackboardComponent> Blackboard; 
@@ -67,11 +70,7 @@ public:
 	bool IsActiveAttack5;
 	bool IsAttack5Success; 
 	bool IsPhase2;
-	bool IsDie;
-	
-	bool IsTurnLeft; 
-	float DeltaRotAngle;
-	FVector PreForward;
+	bool IsDie; 
 
 	UPROPERTY(EditAnywhere, Category = Temp)
 	TObjectPtr<UStaticMeshComponent> LightningExplosionMesh;
@@ -116,7 +115,10 @@ private:
 	FTimerHandle Attack5TimerHandle; 
 	FTimerHandle Attack6TimerHandle; 
 	
-	FTimerHandle ThrowTimerHandle;
+	FTimerHandle ThrowTimerHandle; 
+
+	FTimerHandle FocusTimerHandle; 
+	FTimerHandle HitTimerHandle; 
 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<UAnimMontage> Awake_Montage;
@@ -130,4 +132,13 @@ private:
 	TObjectPtr<UAnimMontage> Attack6_Montage;
 	UPROPERTY(EditAnywhere, Category = Montages) 
 	TObjectPtr<UAnimMontage> Hit_Montage; 
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<UAnimMontage> LTurn_Montage;
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<UAnimMontage> RTurn_Montage;
+
+	bool IsFocusToPlayer; 
+	float Angle; 
+
+	bool IsHit; 
 };

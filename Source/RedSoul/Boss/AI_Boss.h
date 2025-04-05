@@ -14,22 +14,37 @@ class REDSOUL_API UAI_Boss : public UAnimInstance
 	
 public: 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool IsTurnLeft; 
-	UPROPERTY(BlueprintReadOnly)
-	float DeltaRotAngle;
-	UPROPERTY(BlueprintReadOnly)
-	bool IsFalling;
+	
 	UPROPERTY(BlueprintReadOnly) 
-	bool IsPhase2; 
+	float Speed; 
+	UPROPERTY(BlueprintReadOnly)
+	float Dir; 
+
+	UPROPERTY(BlueprintReadOnly) 
+	float RootYaw; 
+
+	float BossYaw; 
+	float LastBossYaw; 
+
+	float IsTurning; 
+	float Turning; 
+	float LastTurning; 
+	
 	UPROPERTY(BlueprintReadOnly) 
 	bool IsActiveAttack2;
 	UPROPERTY(BlueprintReadOnly) 
 	bool IsActiveAttack5;
 	UPROPERTY(BlueprintReadOnly) 
 	bool IsAttack5Success;
+	
+	UPROPERTY(BlueprintReadOnly)
+	bool IsFalling;
 	UPROPERTY(BlueprintReadOnly) 
-	bool IsDie;
+	bool IsPhase2; 
+	UPROPERTY(BlueprintReadOnly) 
+	bool IsDie; 
+
+private: 
+	TObjectPtr<ABoss> Boss; 
 	
 };

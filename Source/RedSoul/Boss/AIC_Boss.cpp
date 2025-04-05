@@ -25,3 +25,14 @@ void AAIC_Boss::Awaken(ACharacter* OtherCharacter)
 	
 }
 
+void AAIC_Boss::SetAttackCoolTime()
+{ 
+	Blackboard->SetValueAsBool("IsCoolTime", true); 
+	GetWorld()->GetTimerManager().SetTimer(CoolTimeHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		Blackboard->SetValueAsBool("IsCoolTime", false); 
+
+		GetWorld()->GetTimerManager().ClearTimer(CoolTimeHandle); 
+	}), 0.75f, false); 
+}
+

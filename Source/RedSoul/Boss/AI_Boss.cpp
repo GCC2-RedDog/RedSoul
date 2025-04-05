@@ -5,18 +5,22 @@
 
 void UAI_Boss::NativeUpdateAnimation(float DeltaSeconds)
 { 
-	if (auto Boss = Cast<ABoss>(GetOwningActor())) {
-		IsTurnLeft = Boss->IsTurnLeft;
-		DeltaRotAngle = Boss->DeltaRotAngle; 
+	if (!Boss) Boss = Cast<ABoss>(GetOwningActor()); 
+
+	if (Boss) { 
+		FVector Velocity =  Boss->GetVelocity(); 
+		IsFalling = !(Velocity.Z); 
+
+		Dir = CalculateDirection(Velocity, Boss->GetActorRotation()); 
+
+		Velocity.Z = 0;  
+		Speed = Velocity.Length(); 
 		
 		IsActiveAttack2 = Boss->IsActiveAttack2; 
 		IsActiveAttack5 = Boss->IsActiveAttack5;
 		IsAttack5Success = Boss->IsAttack5Success; 
 		
-		IsFalling = !(Boss->GetVelocity().Z); 
-		
-		IsPhase2 = Boss->IsPhase2;
-
+		IsPhase2 = Boss->IsPhase2; 
 		IsDie = Boss->IsDie; 
 	}
 }

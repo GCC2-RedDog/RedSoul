@@ -9,7 +9,8 @@
 #include "Components/BoxComponent.h" 
 #include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h" 
-#include "Kismet/GameplayStatics.h"
+#include "Kismet/GameplayStatics.h" 
+#include "DrawDebugHelpers.h"  
 
 ABoss::ABoss()
 {
@@ -32,8 +33,6 @@ void ABoss::BeginPlay()
 	LightningExplosionMesh = Cast<UStaticMeshComponent>(FindComponentByTag(UStaticMeshComponent::StaticClass(), "Lightning")); 
 
 	BossInfoObject = CreateWidget<UBossUI>(GetWorld(), BossInfoWidget); 
-	
-	PreForward = GetActorForwardVector(); 
 }
 
 void ABoss::Tick(float DeltaTime)
@@ -43,24 +42,23 @@ void ABoss::Tick(float DeltaTime)
 	if (Player && Blackboard) { 
 		float Distance = (GetActorLocation() - Player->GetActorLocation()).Length();
 		Blackboard->SetValueAsFloat("BossToPlayerDistance", Distance);
-	}
-
-	FVector CurForward = GetActorForwardVector();
-	if (CurForward != PreForward)
-	{
-		DeltaRotAngle = acosf(CurForward.Dot(PreForward)) * 180 / PI;  
-		IsTurnLeft = !(PreForward.Cross(CurForward).Z > 0);   
-		PreForward = CurForward;
 	} 
-	else
-	{
-		DeltaRotAngle = 0; 
-	}
-}
 
+	if (IsFocusToPlayer) {
+		AddActorLocalRotation(FRotator(0.0f, Angle * DeltaTime * 2.5f, 0.0f)); 
+	} 
+
+	FVector Pos;
+	FRotator Rot; 
+	BossMesh->GetSocketWorldLocationAndRotation("LHand", Pos, Rot); 
+	DrawDebugBox(GetWorld(), Pos, FVector(60, 90, 210), Rot.Quaternion(), FColor::Red); 
+	BossMesh->GetSocketWorldLocationAndRotation("RHand", Pos, Rot);
+	DrawDebugBox(GetWorld(), Pos, FVector(60, 90, 210), Rot.Quaternion(), FColor::Red); 
+} 
+ 
 void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 { 
-	if (IsAwake && !IsDie) { 
+	if (IsAwake && !IsDie && !IsHit) { 
 		CurHP -= AttackInfo.Damage;
 		Cast<UBossUI>(BossInfoObject)->SetHPBar(CurHP / MaxHP);
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Boss Hit %f"), CurHP));
@@ -82,7 +80,15 @@ void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 		if (CurHP <= 0) { 
 			IsDie = true; 
 			Die(); 
-		}
+		} 
+
+		IsHit = true; 
+		GetWorld()->GetTimerManager().SetTimer(HitTimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			IsHit = false; 
+
+			GetWorld()->GetTimerManager().ClearTimer(HitTimerHandle); 
+		}), 0.2f, false); 
 	} 
 }
 
@@ -180,17 +186,21 @@ void ABoss::SetAttackState(EAttackHand Hand, bool IsHandAttack, bool State)
 	
 	switch (Hand)
 	{
-	case EAttackHand::AH_None:
+	case EAttackHand::AH_None: 
 		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Center");
-		break;
+		HandAttackCollider->SetRelativeScale3D(FVector(0.35f, 0.35f, 0.35f)); 
+		break; 
 	case EAttackHand::AH_Center:
-		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Center");
+		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Center"); 
+		HandAttackCollider->SetRelativeScale3D(FVector(0.7f, 0.7f, 0.7f)); 
 		break;
 	case EAttackHand::AH_Left:
 		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "LHand");
+		HandAttackCollider->SetRelativeScale3D(FVector(0.2f, 0.3f, 0.7f)); 
 		break;
 	case EAttackHand::AH_Right:
 		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "RHand");
+		HandAttackCollider->SetRelativeScale3D(FVector(0.2f, 0.3f, 0.7f)); 
 		break; 
 	}
 	
@@ -199,11 +209,8 @@ void ABoss::SetAttackState(EAttackHand Hand, bool IsHandAttack, bool State)
 	SetActorLocation(GetActorLocation() + FVector(0.1f, 0, 0));
 
 	if (!State && AttackType == EAttackType::AT_Attack5)
-	{
-		if (auto AI = BossMesh->GetAnimInstance())
-		{
-			IsAttack5Success = false;
-		}
+	{ 
+		IsAttack5Success = false; 
 	} 
 
 	if (!State) AttackType = EAttackType::AT_None;
@@ -251,6 +258,30 @@ void ABoss::SetBlockToPlayer(bool State)
 	else BossMesh->MoveIgnoreActors.Remove(Player); 
 }
 
+void ABoss::FocusToPlayer()
+{
+	IsFocusToPlayer = true;
+
+	Angle = FMath::RadiansToDegrees(FMath::Acos(GetActorForwardVector().Dot(GetBossToPlayerDir())));
+
+	float Dir = GetActorForwardVector().Cross(GetBossToPlayerDir()).Z;
+	Angle *= Dir > 0 ? 1 : -1;
+
+	if (Angle > 30) { 
+		if (auto AI = BossMesh->GetAnimInstance())
+		{
+			AI->Montage_Play(Dir > 0 ? RTurn_Montage : LTurn_Montage);
+		}
+	} 
+
+	GetWorld()->GetTimerManager().SetTimer(FocusTimerHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		IsFocusToPlayer = false; 
+
+		GetWorld()->GetTimerManager().ClearTimer(FocusTimerHandle); 
+	}), 0.4f, false); 
+}
+
 void ABoss::OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 { 
 	switch (AttackType) {
@@ -262,12 +293,13 @@ void ABoss::OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 		break;
 	case EAttackType::AT_Attack3:
 		Execute_Hit(Player, { IsPhase2 ? 15.0f : 10.0f, true, 2 });
-		LaunchPlayer(GetFistSwingDir(), 2000.0f);
+		LaunchPlayer(GetFistSwingDir(), 1300.0f); 
 		break;
 	case EAttackType::AT_Attack4:
 		Execute_Hit(Player, { 10, false,  0 }); 
-		LaunchPlayer(GetShoulderHitDir(), 750.0f); 
+		if (IsPhase2) LaunchPlayer(GetShoulderHitDir(), 750.0f); 
 		SetAttackState(EAttackHand::AH_None, true, false); 
+		GetCharacterMovement()->Velocity = FVector(0); 
 		break;
 	case EAttackType::AT_Attack5:
 		if (auto AIC = Cast<AAIC_Boss>(GetController())) { 
@@ -276,7 +308,8 @@ void ABoss::OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 		
 		IsAttack5Success = true; 
 		break;
-	}
+	} 
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%f"), (GetActorLocation() - Player->GetActorLocation()).Length())); 
 }
 
 void ABoss::OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -310,7 +343,7 @@ FVector ABoss::GetBossToPlayerDir()
 
 FVector ABoss::GetFistSwingDir()
 { 
-	return GetBossToPlayerDir() + FVector(0, 0, 0.1f); 
+	return GetBossToPlayerDir() + FVector(0, 0, 0.2f); 
 }
 
 FVector ABoss::GetShoulderDir()
@@ -325,5 +358,5 @@ FVector ABoss::GetThrowPlayerDir()
 
 FVector ABoss::GetShoulderHitDir()
 {
-	return GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.2f); 
+	return GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.35f); 
 }
