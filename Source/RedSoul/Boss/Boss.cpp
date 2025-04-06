@@ -188,7 +188,7 @@ void ABoss::SetAttackState(EAttackHand Hand, bool IsHandAttack, bool State)
 	{
 	case EAttackHand::AH_None: 
 		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Center");
-		HandAttackCollider->SetRelativeScale3D(FVector(0.35f, 0.35f, 0.35f)); 
+		HandAttackCollider->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f)); 
 		break; 
 	case EAttackHand::AH_Center:
 		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Center"); 
@@ -293,7 +293,7 @@ void ABoss::OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 		break;
 	case EAttackType::AT_Attack3:
 		Execute_Hit(Player, { IsPhase2 ? 15.0f : 10.0f, true, 2 });
-		LaunchPlayer(GetFistSwingDir(), 1300.0f); 
+		LaunchPlayer(GetFistSwingDir(), 1500.0f); 
 		break;
 	case EAttackType::AT_Attack4:
 		Execute_Hit(Player, { 10, false,  0 }); 
@@ -343,7 +343,7 @@ FVector ABoss::GetBossToPlayerDir()
 
 FVector ABoss::GetFistSwingDir()
 { 
-	return GetBossToPlayerDir() + FVector(0, 0, 0.2f); 
+	return GetBossToPlayerDir() + FVector(0, 0, 0.25f); 
 }
 
 FVector ABoss::GetShoulderDir()
