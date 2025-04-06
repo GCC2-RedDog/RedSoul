@@ -61,7 +61,7 @@ void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 	if (IsAwake && !IsDie && !IsHit) { 
 		CurHP -= AttackInfo.Damage;
 		Cast<UBossUI>(BossInfoObject)->SetHPBar(CurHP / MaxHP);
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Boss Hit %f"), CurHP));
+		//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Boss Hit %f"), CurHP));
 
 		if (AttackType == EAttackType::AT_None)
 		{
@@ -74,7 +74,7 @@ void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 		if (!IsPhase2 && CurHP <= MaxHP * 5 / 10.0f) { 
 			IsPhase2 = true; 
 			Blackboard->SetValueAsBool("IsPhase2", true); 
-			GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Phase 2")); 
+			//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Phase 2")); 
 		} 
 		
 		if (CurHP <= 0) { 
@@ -215,7 +215,7 @@ void ABoss::SetAttackState(EAttackHand Hand, bool IsHandAttack, bool State)
 
 	if (!State) AttackType = EAttackType::AT_None;
 	
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, State ? TEXT("AttackStart") : TEXT("AttackEnd")); 
+	//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, State ? TEXT("AttackStart") : TEXT("AttackEnd")); 
 } 
 
 FVector ABoss::GetPlayerAround(float Distance) 
@@ -322,7 +322,7 @@ void ABoss::OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* Overlapp
 
 void ABoss::Die()
 { 
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Boss Die")); 
+	//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Boss Die")); 
 
 	if (auto AIC = Cast<AAIC_Boss>(GetController())) 
 	{
