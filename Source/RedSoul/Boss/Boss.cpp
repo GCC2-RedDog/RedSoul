@@ -249,7 +249,7 @@ void ABoss::PlayerThrow()
 		Execute_Hit(Player, { 10, false, 0 });
 
 		GetWorld()->GetTimerManager().ClearTimer(ThrowTimerHandle); 
-	}), 0.5f, false);
+	}), 0.35f, false);
 }
 
 void ABoss::SetBlockToPlayer(bool State)
@@ -352,7 +352,7 @@ FVector ABoss::GetShoulderDir()
 
 FVector ABoss::GetThrowPlayerDir()
 {
-	return GetBossToPlayerDir() - FVector(0.0f, 0.0f, 0.65f); 
+	return GetBossToPlayerDir() - FVector(0.0f, 0.0f, 0.35f); 
 }
 
 FVector ABoss::GetShoulderHitDir()
