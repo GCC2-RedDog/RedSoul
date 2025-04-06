@@ -15,6 +15,9 @@ public:
 	virtual void OnPossess(APawn* InPawn) override; 
 	 
 	void Awaken(ACharacter* OtherCharacter); 
+
+	UFUNCTION(BlueprintCallable) 
+	void SetAttackCoolTime(); 
 	
 	UPROPERTY(EditAnywhere, Category = AI)
 	TObjectPtr<UBehaviorTree> BT; 
@@ -24,5 +27,7 @@ private:
 
 	UPROPERTY() 
 	TObjectPtr<class ABoss> Boss; 
+
+	FTimerHandle CoolTimeHandle; 
 
 };

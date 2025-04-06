@@ -14,14 +14,25 @@ void AAIC_Boss::OnPossess(APawn* InPawn)
 
 void AAIC_Boss::SetBlackboard(ACharacter* OtherCharacter)
 {
-	Boss->Blackboard = GetBlackboardComponent(); 
-	Boss->Player = OtherCharacter; 
+	Boss->Blackboard = GetBlackboardComponent();
+	Blackboard->SetValueAsObject("Player", OtherCharacter); 
 } 
 
 void AAIC_Boss::Awaken(ACharacter* OtherCharacter)
 { 
 	RunBehaviorTree(BT); 
 	SetBlackboard(OtherCharacter); 
-	Blackboard->SetValueAsObject("Player", OtherCharacter); 
+	
+}
+
+void AAIC_Boss::SetAttackCoolTime()
+{ 
+	Blackboard->SetValueAsBool("IsCoolTime", true); 
+	GetWorld()->GetTimerManager().SetTimer(CoolTimeHandle, FTimerDelegate::CreateLambda([&]()
+	{
+		Blackboard->SetValueAsBool("IsCoolTime", false); 
+
+		GetWorld()->GetTimerManager().ClearTimer(CoolTimeHandle); 
+	}), 0.75f, false); 
 }
 

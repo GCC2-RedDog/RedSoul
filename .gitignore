@@ -74,5 +74,6 @@ Plugins/**/Intermediate/*
 DerivedDataCache/*
 
 Content/Assets/*
+Content/ParagonRampage/* 
 
 .idea/*
