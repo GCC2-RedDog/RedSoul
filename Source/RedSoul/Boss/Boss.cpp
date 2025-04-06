@@ -48,12 +48,12 @@ void ABoss::Tick(float DeltaTime)
 		AddActorLocalRotation(FRotator(0.0f, Angle * DeltaTime * 2.5f, 0.0f)); 
 	} 
 
-	FVector Pos;
-	FRotator Rot; 
-	BossMesh->GetSocketWorldLocationAndRotation("LHand", Pos, Rot); 
-	DrawDebugBox(GetWorld(), Pos, FVector(60, 90, 210), Rot.Quaternion(), FColor::Red); 
-	BossMesh->GetSocketWorldLocationAndRotation("RHand", Pos, Rot);
-	DrawDebugBox(GetWorld(), Pos, FVector(60, 90, 210), Rot.Quaternion(), FColor::Red); 
+	//FVector Pos;
+	//FRotator Rot; 
+	//BossMesh->GetSocketWorldLocationAndRotation("LHand", Pos, Rot); 
+	//DrawDebugBox(GetWorld(), Pos, FVector(60, 90, 210), Rot.Quaternion(), FColor::Red); 
+	//BossMesh->GetSocketWorldLocationAndRotation("RHand", Pos, Rot);
+	//DrawDebugBox(GetWorld(), Pos, FVector(60, 90, 210), Rot.Quaternion(), FColor::Red); 
 } 
  
 void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
@@ -308,8 +308,7 @@ void ABoss::OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 		
 		IsAttack5Success = true; 
 		break;
-	} 
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%f"), (GetActorLocation() - Player->GetActorLocation()).Length())); 
+	} 	
 }
 
 void ABoss::OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
