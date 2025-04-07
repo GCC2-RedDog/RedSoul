@@ -69,9 +69,10 @@ void ABoss::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	GetWorld()->GetTimerManager().ClearTimer(ThrowTimerHandle); 
 	GetWorld()->GetTimerManager().ClearTimer(FocusTimerHandle); 
 	GetWorld()->GetTimerManager().ClearTimer(HitTimerHandle); 
+	GetWorld()->GetTimerManager().ClearTimer( StunTimerHandle); 
 }
 
-void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
+EAttackResult ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 { 
 	if (IsAwake && !IsDie && !IsHit) { 
 		CurHP -= AttackInfo.Damage;
@@ -94,7 +95,9 @@ void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 		
 		if (CurHP <= 0) { 
 			IsDie = true; 
-			Die(); 
+			Die();
+
+			return EAttackResult::AR_Death; 
 		} 
 
 		IsHit = true; 
@@ -103,8 +106,11 @@ void ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 			IsHit = false; 
 
 			GetWorld()->GetTimerManager().ClearTimer(HitTimerHandle); 
-		}), 0.2f, false); 
-	} 
+		}), 0.2f, false);
+
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_StoneParts, AttackInfo.HitPos, AttackInfo.HitNormal.Rotation()); 
+	}
+	return EAttackResult::AR_None; 
 }
 
 void ABoss::Interaction_Implementation(ACharacter* OtherCharacter)
@@ -263,7 +269,7 @@ void ABoss::PlayerThrow()
 	LaunchPlayer(GetThrowPlayerDir(), 1500.0f);
 
 	GetWorld()->GetTimerManager().SetTimer(ThrowTimerHandle, FTimerDelegate::CreateLambda([&]() {
-		Execute_Hit(Player, { 10, false, 0 });
+		Execute_Hit(Player, { 10, false, 0, FVector(0), FVector(0), false });
 
 		GetWorld()->GetTimerManager().ClearTimer(ThrowTimerHandle); 
 	}), 0.25f, false);
@@ -300,20 +306,22 @@ void ABoss::FocusToPlayer()
 }
 
 void ABoss::OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{ 
+{
+	EAttackResult AR = EAttackResult::AR_None; 
+	
 	switch (AttackType) {
 	case EAttackType::AT_Attack1:
-		Execute_Hit(Player, { IsPhase2 ? 15.0f : 10.0f, false, 0 });
+		AR = Execute_Hit(Player, { IsPhase2 ? 15.0f : 10.0f, false, 0, FVector(0), FVector(0), true });
 		break;
 	case EAttackType::AT_Attack2:
-		Execute_Hit(Player, { 10, false, 0 }); 
+		AR = Execute_Hit(Player, { 10, false, 0, FVector(0), FVector(0), false }); 
 		break;
 	case EAttackType::AT_Attack3:
-		Execute_Hit(Player, { IsPhase2 ? 15.0f : 10.0f, true, 2 });
+		AR = Execute_Hit(Player, { IsPhase2 ? 15.0f : 10.0f, true, 2, FVector(0), FVector(0), true });
 		LaunchPlayer(GetFistSwingDir(), 1500.0f); 
 		break;
 	case EAttackType::AT_Attack4:
-		Execute_Hit(Player, { 10, false,  0 }); 
+		Execute_Hit(Player, { 10, false, 0, FVector(0), FVector(0), false }); 
 		if (IsPhase2) LaunchPlayer(GetShoulderHitDir(), 750.0f); 
 		SetAttackState(EAttackHand::AH_None, true, false); 
 		GetCharacterMovement()->Velocity = FVector(0); 
@@ -324,16 +332,32 @@ void ABoss::OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 		} 
 		
 		IsAttack5Success = true; 
-		break;
-	} 	
-}
+		break; 
+	}
+
+	if (AR == EAttackResult::AR_Parrying)
+	{
+		if (auto AI = BossMesh->GetAnimInstance())
+		{
+			AI->Montage_Play(Stun_Montage); 
+		}
+
+		Blackboard->SetValueAsBool("IsStun", true);
+		GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			Blackboard->SetValueAsBool("IsStun", false); 
+			
+			GetWorld()->GetTimerManager().ClearTimer(StunTimerHandle); 
+		}), 2.0f, false); 
+	}
+} 
 
 void ABoss::OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 { 
 	if (AttackType == EAttackType::AT_Attack6)
 	{
 		SetAttackState(EAttackHand::AH_None, false, false); 
-		Execute_Hit(Player, { 10, false, 0 }); 
+		Execute_Hit(Player, { 10, false, 0, FVector(0), FVector(0), false }); 
 	}
 } 
 

@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../Interface/Hitable.h" 
-#include "../Interface/Interactive.h" 
+#include "../Interface/Interactive.h"
+#include "NiagaraFunctionLibrary.h" 
 #include "Boss.generated.h" 
 
 UENUM(BlueprintType) 
@@ -38,7 +39,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override; 
 
-	virtual void Hit_Implementation(FAttackInfo AttackInfo) override; 
+	virtual EAttackResult Hit_Implementation(FAttackInfo AttackInfo) override; 
 	virtual void Interaction_Implementation(ACharacter* OtherCharacter) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -119,7 +120,9 @@ private:
 	FTimerHandle ThrowTimerHandle; 
 
 	FTimerHandle FocusTimerHandle; 
-	FTimerHandle HitTimerHandle; 
+	FTimerHandle HitTimerHandle;
+	
+	FTimerHandle StunTimerHandle; 
 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<UAnimMontage> Awake_Montage;
@@ -136,8 +139,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<UAnimMontage> LTurn_Montage;
 	UPROPERTY(EditAnywhere, Category = Montages)
-	TObjectPtr<UAnimMontage> RTurn_Montage;
-
+	TObjectPtr<UAnimMontage> RTurn_Montage; 
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<UAnimMontage> Stun_Montage;
+	
+	UPROPERTY(EditAnywhere, Category=VFX) 
+	TObjectPtr<UNiagaraSystem> NS_StoneParts;
+	
 	bool IsFocusToPlayer; 
 	float Angle; 
 

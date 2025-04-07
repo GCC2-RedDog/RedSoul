@@ -16,7 +16,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool Stun; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float StunTime; 
+	float StunTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector HitPos;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector HitNormal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsParryable; 
 	
 };
 
@@ -39,6 +45,6 @@ class REDSOUL_API IHitable
 
 public: 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent) 
-	void Hit(FAttackInfo AttackInfo); 
+	EAttackResult Hit(FAttackInfo AttackInfo); 
 
 };
