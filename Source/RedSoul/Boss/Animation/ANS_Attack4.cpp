@@ -2,7 +2,7 @@
 
 
 #include "ANS_Attack4.h"
-#include "Boss.h"
+#include "../Boss.h"
 
 void UANS_Attack4::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration,
 								  const FAnimNotifyEventReference& EventReference)

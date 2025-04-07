@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "Boss.h" 
+#include "../Boss.h" 
 #include "ANS_Attack5.generated.h"
 
 UCLASS()
