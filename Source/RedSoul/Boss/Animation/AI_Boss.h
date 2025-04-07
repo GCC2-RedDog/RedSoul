@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "Boss.h" 
+#include "../Boss.h" 
 #include "AI_Boss.generated.h"
 
 UCLASS()

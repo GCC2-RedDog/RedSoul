@@ -20,6 +20,13 @@ public:
 	
 };
 
+UENUM(BlueprintType)
+enum EAttackResult {
+	AR_None		UMETA(DisplayName = "None"),
+	AR_Parrying UMETA(DisplayName = "Parrying"),
+	AR_Death	UMETA(DisplayName = "Death") 
+}; 
+
 UINTERFACE(MinimalAPI)
 class UHitable : public UInterface
 {

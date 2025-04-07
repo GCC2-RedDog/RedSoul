@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "Boss.h" 
-#include "ANS_RHandAttack.generated.h"
+#include "../Boss.h" 
+#include "ANS_Catched.generated.h"
 
 UCLASS()
-class REDSOUL_API UANS_RHandAttack : public UAnimNotifyState
+class REDSOUL_API UANS_Catched : public UAnimNotifyState
 {
 	GENERATED_BODY()
 	

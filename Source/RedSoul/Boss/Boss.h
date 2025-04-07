@@ -35,7 +35,8 @@ class REDSOUL_API ABoss : public ACharacter, public IHitable, public IInteractiv
 public:
 	ABoss();
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override; 
+	virtual void Tick(float DeltaTime) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override; 
 
 	virtual void Hit_Implementation(FAttackInfo AttackInfo) override; 
 	virtual void Interaction_Implementation(ACharacter* OtherCharacter) override;
