@@ -51,12 +51,20 @@ void ABoss::Tick(float DeltaTime)
 		AddActorLocalRotation(FRotator(0.0f, FocusToPlayerAngle * DeltaTime * 2.5f, 0.0f));
 	}
 
-	if (IsActiveAttack2 && BossToPlayerDist < 500.0f)
+	if (IsActiveAttack2)
 	{
-		if (auto MC = GetMovementComponent())
+		float BossToTargetLocationDist = (GetActorLocation() - Attack2TargetLocation).Length(); 
+		if (BossToTargetLocationDist < 750.0f)
 		{
-			MC->Velocity /= 5.0f;
-			MC->Velocity.Z -= 980.0f; 
+			if (auto MC = GetMovementComponent())
+			{
+				MC->Velocity.Z = 0;
+				MC->Velocity.Normalize();
+				MC->Velocity *= 2000.0f; 
+				MC->Velocity.Z = -980.0f * 2.0f; 
+			}
+
+			IsActiveAttack2 = false; 
 		}
 	}
 	
@@ -72,8 +80,7 @@ void ABoss::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	GetWorld()->GetTimerManager().ClearTimer(AwakeTimerHandle);
-	GetWorld()->GetTimerManager().ClearTimer(Attack2TimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(AwakeTimerHandle); 
 	GetWorld()->GetTimerManager().ClearTimer(Attack4TimerHandle);
 	GetWorld()->GetTimerManager().ClearTimer(Attack5TimerHandle);
 	GetWorld()->GetTimerManager().ClearTimer(Attack6TimerHandle);
@@ -111,7 +118,7 @@ EAttackResult ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 			IsDie = true;
 			Die();
 
-			return EAttackResult::AR_Death;
+			return EAttackResult::AR_Death; 
 		}
 
 		IsHit = true;
@@ -173,18 +180,13 @@ void ABoss::Attack(EAttackType Value)
 
 			IsActiveAttack2 = true;
 
-			GetWorld()->GetTimerManager().SetTimer(Attack2TimerHandle, FTimerDelegate::CreateLambda([&]()
-			{
-				FVector CalcVelocity(0);
-				UGameplayStatics::SuggestProjectileVelocity_CustomArc(GetWorld(), CalcVelocity, GetActorLocation(),
-				                                                      GetPlayerAround(-BossToPlayerDist / 2), 0.0f,
-				                                                      0.5f);
-				LaunchCharacter(CalcVelocity, false, false);
-
-				GetWorld()->GetTimerManager().ClearTimer(Attack2TimerHandle);
-			}), 0.1f, false);
-
-			break;
+			FVector CalcVelocity(0);
+			Attack2TargetLocation = Player->GetActorLocation(); 
+			UGameplayStatics::SuggestProjectileVelocity_CustomArc(GetWorld(), CalcVelocity, GetActorLocation(),
+																  GetPlayerAround(-BossToPlayerDist), 0.0f,
+																  0.85f);
+			LaunchCharacter(CalcVelocity, false, false); 
+			break; 
 		}
 	case EAttackType::AT_Attack3:
 		if (auto AI = BossMesh->GetAnimInstance())
@@ -208,7 +210,7 @@ void ABoss::Attack(EAttackType Value)
 			IsActiveAttack5 = false;
 
 			GetWorld()->GetTimerManager().ClearTimer(Attack5TimerHandle);
-		}), 0.2f, false);
+		}), 0.1f, false);
 		break;
 	case EAttackType::AT_Attack6:
 		if (auto AI = BossMesh->GetAnimInstance())
@@ -249,12 +251,7 @@ void ABoss::SetAttackState(EAttackHand Hand, bool IsHandAttack, bool State)
 
 	if (IsHandAttack) HandAttackCollider->SetGenerateOverlapEvents(State);
 	else LightningExplosionAttackCollider->SetGenerateOverlapEvents(State);
-	SetActorLocation(GetActorLocation() + FVector(0.1f, 0, 0));
-
-	if (!State && AttackType == EAttackType::AT_Attack5)
-	{
-		IsAttack5Success = false;
-	}
+	SetActorLocation(GetActorLocation() + FVector(0.1f, 0, 0)); 
 
 	if (!State) AttackType = EAttackType::AT_None;
 
@@ -276,9 +273,12 @@ void ABoss::FocusToPlayer()
 	float Dir = GetActorForwardVector().Cross(GetBossToPlayerDir()).Z;
 	FocusToPlayerAngle *= Dir > 0 ? 1 : -1;
 
-	if (auto AI = BossMesh->GetAnimInstance())
+	if (abs(FocusToPlayerAngle) > 5.0f)
 	{
-		AI->Montage_Play(Dir > 0 ? RTurn_Montage : LTurn_Montage);
+		if (auto AI = BossMesh->GetAnimInstance())
+		{
+			AI->Montage_Play(Dir > 0 ? RTurn_Montage : LTurn_Montage);
+		}
 	}
 
 	GetWorld()->GetTimerManager().SetTimer(FocusTimerHandle, FTimerDelegate::CreateLambda([&]()
@@ -293,15 +293,20 @@ void ABoss::PlayerCatch()
 {
 	Player->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "CatchedPosition");
 
-	Player->GetComponentByClass<UCharacterMovementComponent>()->GravityScale = 0.0f;
-	Player->GetComponentByClass<UCharacterMovementComponent>()->MaxWalkSpeed = 0.0f;
+	if (auto CMC = Player->GetComponentByClass<UCharacterMovementComponent>())
+	{
+		CMC->GravityScale = 0.0f;
+		CMC->MaxWalkSpeed = 0.0f;
+	}
 }
 
 void ABoss::PlayerThrow()
 {
-	Player->GetComponentByClass<UCharacterMovementComponent>()->GravityScale = 1.75f;
-	Player->GetComponentByClass<UCharacterMovementComponent>()->MaxWalkSpeed = 500.0f;
-
+	if (auto CMC = Player->GetComponentByClass<UCharacterMovementComponent>())
+	{
+		CMC->GravityScale = 1.75f;
+		CMC->MaxWalkSpeed = 500.0f;
+	}
 	Player->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 
 	LaunchPlayer(GetThrowPlayerDir(), 1500.0f);

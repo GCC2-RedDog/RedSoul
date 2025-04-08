@@ -105,8 +105,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<class USphereComponent> LightningExplosionAttackCollider; 
 	
-	FTimerHandle AwakeTimerHandle;
-	FTimerHandle Attack2TimerHandle; 
+	FTimerHandle AwakeTimerHandle; 
 	FTimerHandle Attack4TimerHandle; 
 	FTimerHandle Attack5TimerHandle; 
 	FTimerHandle Attack6TimerHandle; 
@@ -140,11 +139,11 @@ private:
 	EAttackType AttackType;
 
 	bool IsAwake; 
-
 	bool IsFocusToPlayer; 
-	float FocusToPlayerAngle; 
-
 	bool IsHit;
 
-	float BossToPlayerDist; 
+	float FocusToPlayerAngle; 
+	float BossToPlayerDist;
+
+	FVector Attack2TargetLocation; 
 };

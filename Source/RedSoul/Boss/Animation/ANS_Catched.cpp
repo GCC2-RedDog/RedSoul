@@ -22,6 +22,7 @@ void UANS_Catched::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	if (Boss)
 	{
 		Boss->PlayerThrow();
-		Boss->SetIgnoreToPlayer(false); 
+		Boss->SetIgnoreToPlayer(false);
+		Boss->IsAttack5Success = false; 
 	}
 }
