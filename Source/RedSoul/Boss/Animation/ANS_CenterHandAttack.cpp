@@ -22,6 +22,6 @@ void UANS_CenterHandAttack::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeq
 	if (Boss)
 	{
 		Boss->SetAttackState(EAttackHand::AH_Center, true, false); 
-		Boss->SetBlockToPlayer(false); 
+		Boss->SetIgnoreToPlayer(false); 
 	}
 }
