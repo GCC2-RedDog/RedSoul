@@ -22,6 +22,6 @@ void UANS_RHandAttack::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequence
 	if (Boss)
 	{
 		Boss->SetAttackState(EAttackHand::AH_Right, true, false);
-		Boss->SetBlockToPlayer(false); 
+		Boss->SetIgnoreToPlayer(false); 
 	}
 }

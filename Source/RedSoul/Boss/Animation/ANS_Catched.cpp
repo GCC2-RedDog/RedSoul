@@ -22,6 +22,6 @@ void UANS_Catched::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	if (Boss)
 	{
 		Boss->PlayerThrow();
-		Boss->SetBlockToPlayer(false); 
+		Boss->SetIgnoreToPlayer(false); 
 	}
 }
