@@ -10,7 +10,7 @@ void UANS_Attack5::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 
 	if (Boss = Cast<ABoss>(MeshComp->GetOwner()))
 	{
-		Boss->SetAttackState(EAttackHand::AH_None, true, true); 
+		Boss->SetAttackState(EAttackHand::AH_Left, true, true); 
 	}
 }
 
@@ -21,6 +21,6 @@ void UANS_Attack5::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 
 	if (Boss)
 	{
-		Boss->SetAttackState(EAttackHand::AH_None, true, false); 
+		Boss->SetAttackState(EAttackHand::AH_Left, true, false); 
 	}
 }
