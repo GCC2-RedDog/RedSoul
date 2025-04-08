@@ -46,32 +46,25 @@ public:
 	void Attack(EAttackType Value); 
 	UFUNCTION(BlueprintCallable) 
 	void SetAttackState(EAttackHand Hand, bool IsHandAttack, bool State); 
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure) 
-	FVector GetPlayerAround(float Distance); 
-	UFUNCTION(BlueprintCallable) 
-	void LaunchPlayer(FVector Dir, float Force);
-
-	FVector GetShoulderDir(); 
-	
-	void PlayerCatch(); 
-	void PlayerThrow();
-
-	void SetBlockToPlayer(bool State); 
-
+	void SetIgnoreToPlayer(bool State); 
 	UFUNCTION(BlueprintCallable) 
 	void FocusToPlayer(); 
 	
-	UPROPERTY()
-	TObjectPtr<class UBlackboardComponent> Blackboard; 
-	UPROPERTY() 
-	TObjectPtr<ACharacter> Player; 
+	void PlayerCatch(); 
+	void PlayerThrow(); 
 	
-	bool IsAwake; 
+	UFUNCTION(BlueprintCallable, BlueprintPure) 
+	FVector GetPlayerAround(float Distance); 
+
+	FVector GetShoulderDir(); 
+	
+	UPROPERTY()
+	TObjectPtr<class UBlackboardComponent> Blackboard;
+	
 	bool IsActiveAttack2;
 	bool IsActiveAttack5;
 	bool IsAttack5Success; 
-	bool IsPhase2;
+	bool IsPhase2; 
 	bool IsDie; 
 
 	UPROPERTY(EditAnywhere, Category = Temp)
@@ -82,7 +75,8 @@ private:
 	void OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
 	UFUNCTION()
 	void OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
-	
+
+	void LaunchPlayer(FVector Dir, float Force); 
 	void Die(); 
 
 	FVector GetBossToPlayerDir(); 
@@ -94,6 +88,9 @@ private:
 	float MaxHP; 
 	UPROPERTY(EditAnywhere, Category = Stat)  
 	float CurHP; 
+	
+	UPROPERTY() 
+	TObjectPtr<ACharacter> Player; 
 
 	UPROPERTY()
 	TObjectPtr<USkeletalMeshComponent> BossMesh; 
@@ -107,21 +104,15 @@ private:
 	TObjectPtr<class UBoxComponent> HandAttackCollider; 
 	UPROPERTY()
 	TObjectPtr<class USphereComponent> LightningExplosionAttackCollider; 
-
-	EAttackType AttackType;
 	
 	FTimerHandle AwakeTimerHandle;
-	
 	FTimerHandle Attack2TimerHandle; 
 	FTimerHandle Attack4TimerHandle; 
 	FTimerHandle Attack5TimerHandle; 
 	FTimerHandle Attack6TimerHandle; 
-	
 	FTimerHandle ThrowTimerHandle; 
-
 	FTimerHandle FocusTimerHandle; 
-	FTimerHandle HitTimerHandle;
-	
+	FTimerHandle HitTimerHandle; 
 	FTimerHandle StunTimerHandle; 
 
 	UPROPERTY(EditAnywhere, Category = Montages)
@@ -146,8 +137,14 @@ private:
 	UPROPERTY(EditAnywhere, Category=VFX) 
 	TObjectPtr<UNiagaraSystem> NS_StoneParts;
 	
-	bool IsFocusToPlayer; 
-	float Angle; 
+	EAttackType AttackType;
 
-	bool IsHit; 
+	bool IsAwake; 
+
+	bool IsFocusToPlayer; 
+	float FocusToPlayerAngle; 
+
+	bool IsHit;
+
+	float BossToPlayerDist; 
 };

@@ -14,15 +14,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Damage; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool Parryable; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool DirectHit; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool Stun; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float StunTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector HitPos;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector HitNormal;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool IsParryable; 
+	FVector HitNormal; 
 	
 };
 
