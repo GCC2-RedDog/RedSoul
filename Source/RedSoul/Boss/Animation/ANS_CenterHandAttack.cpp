@@ -3,8 +3,10 @@
 
 #include "ANS_CenterHandAttack.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
+
 void UANS_CenterHandAttack::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration,
-								   const FAnimNotifyEventReference& EventReference)
+                               const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 
@@ -22,6 +24,6 @@ void UANS_CenterHandAttack::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeq
 	if (Boss)
 	{
 		Boss->SetAttackState(EAttackHand::AH_Center, true, false); 
-		Boss->SetIgnoreToPlayer(false); 
+		Boss->SetIgnoreToPlayer(false);
 	}
 }
