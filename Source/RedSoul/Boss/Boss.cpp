@@ -11,6 +11,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 ABoss::ABoss()
 {
@@ -30,6 +32,9 @@ void ABoss::BeginPlay()
 
 	DirectHitCollider = FindComponentByTag<UBoxComponent>("DirectHit");
 	DirectHitCollider->OnComponentBeginOverlap.AddDynamic(this, &ABoss::OnMeshOverlapBegin);
+
+	NS_LightningAura_L = FindComponentByTag<UNiagaraComponent>("LightningAura_L"); 
+	NS_LightningAura_R = FindComponentByTag<UNiagaraComponent>("LightningAura_R"); 
 	
 	BossMesh = FindComponentByClass<USkeletalMeshComponent>();
 
@@ -52,26 +57,26 @@ void ABoss::Tick(float DeltaTime)
 	if (IsFocusToPlayer)
 	{
 		AddActorLocalRotation(FRotator(0.0f, FocusToPlayerAngle * DeltaTime * 2.5f, 0.0f));
-	}
+	} 
 
 	if (IsActiveAttack2)
-	{
+	{ 
 		FVector BossToTargetDir = Attack2TargetLocation - GetActorLocation(); 
 		if (BossToTargetDir.Length() < 750.0f)
 		{
 			//BossToTargetDir += FVector(0, 0, -980.0f); 
-			GetCharacterMovement()->AddImpulse(FVector(0, 0, -980.0f * 2.0f), true); 
+			// GetCharacterMovement()->AddImpulse(FVector(0, 0, -980.0f), true); 
 			//LaunchCharacter(BossToTargetDir, false, false); 
 			//GetCharacterMovement()->GravityScale *= 5.0f; 
-			// if (auto MC = GetMovementComponent())
-			// {
-			// 	FVector& Vel = MC->Velocity;
-			// 	Vel.Z = 0; 
-			// 	Vel = Vel.GetSafeNormal() * 5000.0f; 
-			// 	Vel.Z = -980.0f; 
-			// }
-
-			IsActiveAttack2 = false; 
+			if (auto MC = GetMovementComponent())
+			{
+				FVector& Vel = MC->Velocity;
+				Vel.Z = 0; 
+				Vel = Vel.GetSafeNormal() * 2000.0f; 
+				Vel.Z = -980.0f; 
+			} 
+			IsActiveAttack2 = false;
+			IsAttack2Smash = true; 
 		}
 	}
 	
@@ -134,6 +139,9 @@ EAttackResult ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 				Blackboard->SetValueAsBool("IsPhase2", true); 
 				Blackboard->SetValueAsBool("IsAnimPhase2", false); 
 
+				NS_LightningAura_L->SetAutoActivate(true);  
+				NS_LightningAura_R->SetAutoActivate(true);
+				
 				GetWorld()->GetTimerManager().ClearTimer(Phase2TimerHandle);
 			}), 3.0f, false);
 		}
@@ -205,10 +213,10 @@ void ABoss::Attack(EAttackType Value)
 			IsActiveAttack2 = true;
 
 			FVector CalcVelocity(0);
-			Attack2TargetLocation = Player->GetActorLocation() + FVector(0, 0, 100.0f); 
+			Attack2TargetLocation = Player->GetActorLocation() + FVector(0, 0, 250.0f); 
 			UGameplayStatics::SuggestProjectileVelocity_CustomArc(GetWorld(), CalcVelocity, GetActorLocation(),
 																  GetPlayerAround(-BossToPlayerDist / 1.5f), 0.0f,
-																  0.8f);
+																  0.8f); 
 			LaunchCharacter(CalcVelocity, false, false); 
 			break; 
 		}
@@ -344,8 +352,12 @@ void ABoss::PlayerThrow()
 
 	GetWorld()->GetTimerManager().SetTimer(ThrowTimerHandle, FTimerDelegate::CreateLambda([&]()
 	{
-		Execute_Hit(Player, {10, false, false, false, 0, FVector(0), FVector(0)});
-
+		EAttackResult AR = Execute_Hit(Player, {10, false, false, false, 0, FVector(0), FVector(0)});
+		if (AR == EAttackResult::AR_Death)
+		{
+			StopLogic(); 
+		}
+		
 		GetWorld()->GetTimerManager().ClearTimer(ThrowTimerHandle);
 	}), 0.25f, false);
 }
@@ -359,7 +371,7 @@ void ABoss::CheckDirectHit()
 	case EAttackType::AT_Attack1:
 		{
 			FHitResult Hit = GetHitResult(HandAttackCollider->GetComponentLocation(), Player->GetActorLocation());
-			AR = Execute_Hit(Player, {IsPhase2 ? 15.0f : 10, true, IsOverlapMesh, false, 0, FVector(0), FVector(0)});
+			AR = Execute_Hit(Player, {IsPhase2 ? 15.0f : 10, true, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal});
 			break;
 		}
 	case EAttackType::AT_Attack2:
@@ -370,7 +382,7 @@ void ABoss::CheckDirectHit()
 		LaunchPlayer(GetFistSwingDir(), 1500.0f);
 		break;
 	case EAttackType::AT_Attack4:
-		Execute_Hit(Player, {10, false, IsOverlapMesh, false, 0, FVector(0), FVector(0)});
+		AR = Execute_Hit(Player, {10, false, IsOverlapMesh, false, 0, FVector(0), FVector(0)});
 		if (IsPhase2) LaunchPlayer(GetShoulderHitDir(), 750.0f);
 		SetAttackState(EAttackHand::AH_None, true, false);
 		GetCharacterMovement()->Velocity = FVector(0);
@@ -394,11 +406,7 @@ void ABoss::CheckDirectHit()
 		}), 4.0f, false);
 		break;
 	case EAttackResult::AR_Death:
-		if (auto AIC = Cast<AAIC_Boss>(GetController()))
-		{
-			AIC->ClearFocus(2);
-			AIC->GetBrainComponent()->StopLogic(TEXT("Player Die"));
-		}
+		StopLogic(); 
 		break; 
 	}
 
@@ -488,13 +496,21 @@ void ABoss::Die()
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Boss Die")); 
 
+	StopLogic(); 
+
+	NS_LightningAura_L->SetAutoActivate(false);  
+	NS_LightningAura_R->SetAutoActivate(false); 
+	
+	BossInfoObject->RemoveFromParent();
+}
+
+void ABoss::StopLogic()
+{ 
 	if (auto AIC = Cast<AAIC_Boss>(GetController()))
 	{
 		AIC->ClearFocus(2);
 		AIC->GetBrainComponent()->StopLogic(TEXT("Die"));
 	}
-
-	BossInfoObject->RemoveFromParent();
 }
 
 FVector ABoss::GetBossToPlayerDir()
@@ -518,7 +534,7 @@ FVector ABoss::GetShoulderDir()
 
 FVector ABoss::GetThrowPlayerDir()
 {
-	return GetBossToPlayerDir() - FVector(0.0f, 0.0f, 0.35f);
+	return GetBossToPlayerDir() - FVector(0.0f, 0.0f, 0.25f);
 }
 
 FVector ABoss::GetShoulderHitDir()

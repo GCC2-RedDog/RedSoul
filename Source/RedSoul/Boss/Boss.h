@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../Interface/Hitable.h" 
-#include "../Interface/Interactive.h"
-#include "NiagaraFunctionLibrary.h" 
+#include "../Interface/Interactive.h" 
 #include "Boss.generated.h" 
 
 UENUM(BlueprintType) 
@@ -65,10 +64,11 @@ public:
 	TObjectPtr<class UBlackboardComponent> Blackboard;
 	
 	bool IsActiveAttack2;
+	bool IsAttack2Smash; 
 	bool IsActiveAttack5;
 	bool IsAttack5Success; 
 	bool IsPhase2; 
-	bool IsDie; 
+	bool IsDie;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UStaticMeshComponent> LightningExplosionMesh;
@@ -82,8 +82,10 @@ private:
 	void OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
 
 	void LaunchPlayer(FVector Dir, float Force); 
-	void Die(); 
+	void Die();
 
+	void StopLogic();
+	
 	FVector GetBossToPlayerDir(); 
 	FVector GetFistSwingDir(); 
 	FVector GetThrowPlayerDir(); 
@@ -145,7 +147,11 @@ private:
 	TObjectPtr<UAnimMontage> Phase2_Montage;
 	
 	UPROPERTY(EditAnywhere, Category=VFX) 
-	TObjectPtr<UNiagaraSystem> NS_StoneParts; 
+	TObjectPtr<class UNiagaraSystem> NS_StoneParts;
+	UPROPERTY(EditAnywhere, Category=VFX) 
+	TObjectPtr<class UNiagaraComponent> NS_LightningAura_L;
+	UPROPERTY(EditAnywhere, Category=VFX) 
+	TObjectPtr<class UNiagaraComponent> NS_LightningAura_R; 
 	
 	EAttackType AttackType;
 

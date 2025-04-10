@@ -9,14 +9,13 @@ void UAI_Boss::NativeUpdateAnimation(float DeltaSeconds)
 
 	if (Boss) { 
 		FVector Velocity =  Boss->GetVelocity(); 
-		IsFalling = !(Velocity.Z); 
-
 		Dir = CalculateDirection(Velocity, Boss->GetActorRotation()); 
 
 		Velocity.Z = 0;  
 		Speed = Velocity.Length(); 
 		
-		IsActiveAttack2 = Boss->IsActiveAttack2; 
+		IsActiveAttack2 = Boss->IsActiveAttack2;
+		IsAttack2Smash = Boss->IsAttack2Smash; 
 		IsActiveAttack5 = Boss->IsActiveAttack5;
 		IsAttack5Success = Boss->IsAttack5Success; 
 		

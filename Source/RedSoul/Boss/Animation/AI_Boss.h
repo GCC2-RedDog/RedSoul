@@ -18,20 +18,14 @@ public:
 	UPROPERTY(BlueprintReadOnly) 
 	float Speed; 
 	UPROPERTY(BlueprintReadOnly)
-	float Dir; 
-
-	UPROPERTY(BlueprintReadOnly) 
-	float RootYaw; 
-
-	float BossYaw; 
-	float LastBossYaw; 
-
-	float IsTurning; 
-	float Turning; 
-	float LastTurning; 
+	float Dir;
+	UPROPERTY(BlueprintReadOnly)
+	float FloorDist; 
 	
 	UPROPERTY(BlueprintReadOnly) 
 	bool IsActiveAttack2;
+	UPROPERTY(BlueprintReadOnly) 
+	bool IsAttack2Smash;
 	UPROPERTY(BlueprintReadOnly) 
 	bool IsActiveAttack5;
 	UPROPERTY(BlueprintReadOnly) 
