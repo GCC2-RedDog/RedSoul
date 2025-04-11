@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../Interface/Hitable.h" 
-#include "../Interface/Interactive.h"
-#include "NiagaraFunctionLibrary.h" 
+#include "../Interface/Interactive.h" 
 #include "Boss.generated.h" 
 
 UENUM(BlueprintType) 
@@ -52,33 +51,41 @@ public:
 	
 	void PlayerCatch(); 
 	void PlayerThrow(); 
+
+	void CheckDirectHit(); 
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure) 
 	FVector GetPlayerAround(float Distance); 
-
+	FHitResult GetHitResult(FVector AttackColliderLocation, FVector HitActorLocation); 
+	
 	FVector GetShoulderDir(); 
 	
 	UPROPERTY()
 	TObjectPtr<class UBlackboardComponent> Blackboard;
 	
 	bool IsActiveAttack2;
+	bool IsAttack2Smash; 
 	bool IsActiveAttack5;
 	bool IsAttack5Success; 
 	bool IsPhase2; 
-	bool IsDie; 
+	bool IsDie;
 
-	UPROPERTY(EditAnywhere, Category = Temp)
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UStaticMeshComponent> LightningExplosionMesh;
-	
+
 private: 
 	UFUNCTION()
 	void OnHandAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
 	UFUNCTION()
-	void OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
+	void OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult); 
 
 	void LaunchPlayer(FVector Dir, float Force); 
-	void Die(); 
+	void Die();
 
+	void StopLogic();
+	
 	FVector GetBossToPlayerDir(); 
 	FVector GetFistSwingDir(); 
 	FVector GetThrowPlayerDir(); 
@@ -104,16 +111,19 @@ private:
 	TObjectPtr<class UBoxComponent> HandAttackCollider; 
 	UPROPERTY()
 	TObjectPtr<class USphereComponent> LightningExplosionAttackCollider; 
+	UPROPERTY()
+	TObjectPtr<class UBoxComponent> DirectHitCollider; 
 	
-	FTimerHandle AwakeTimerHandle;
-	FTimerHandle Attack2TimerHandle; 
+	FTimerHandle AwakeTimerHandle; 
 	FTimerHandle Attack4TimerHandle; 
 	FTimerHandle Attack5TimerHandle; 
 	FTimerHandle Attack6TimerHandle; 
 	FTimerHandle ThrowTimerHandle; 
 	FTimerHandle FocusTimerHandle; 
 	FTimerHandle HitTimerHandle; 
-	FTimerHandle StunTimerHandle; 
+	FTimerHandle ParryedTimerHandle; 
+	FTimerHandle Phase2TimerHandle;
+	FTimerHandle AttackTimerHandle; 
 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<UAnimMontage> Awake_Montage;
@@ -132,19 +142,28 @@ private:
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<UAnimMontage> RTurn_Montage; 
 	UPROPERTY(EditAnywhere, Category = Montages)
-	TObjectPtr<UAnimMontage> Stun_Montage;
+	TObjectPtr<UAnimMontage> Parryed_Montage;
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<UAnimMontage> Phase2_Montage;
 	
 	UPROPERTY(EditAnywhere, Category=VFX) 
-	TObjectPtr<UNiagaraSystem> NS_StoneParts;
+	TObjectPtr<class UNiagaraSystem> NS_StoneParts;
+	UPROPERTY(EditAnywhere, Category=VFX) 
+	TObjectPtr<class UNiagaraComponent> NS_LightningAura_L;
+	UPROPERTY(EditAnywhere, Category=VFX) 
+	TObjectPtr<class UNiagaraComponent> NS_LightningAura_R; 
 	
 	EAttackType AttackType;
 
 	bool IsAwake; 
-
 	bool IsFocusToPlayer; 
-	float FocusToPlayerAngle; 
-
 	bool IsHit;
+	
+	bool IsOverlapHand;
+	bool IsOverlapMesh; 
 
-	float BossToPlayerDist; 
+	float FocusToPlayerAngle; 
+	float BossToPlayerDist;
+
+	FVector Attack2TargetLocation; 
 };
