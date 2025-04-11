@@ -35,7 +35,9 @@ void ABoss::BeginPlay()
 
 	NS_LightningAura_L = FindComponentByTag<UNiagaraComponent>("LightningAura_L"); 
 	NS_LightningAura_R = FindComponentByTag<UNiagaraComponent>("LightningAura_R"); 
-	
+	NS_LightningAura_L->Deactivate(); 
+	NS_LightningAura_R->Deactivate(); 
+
 	BossMesh = FindComponentByClass<USkeletalMeshComponent>();
 
 	LightningExplosionMesh = Cast<UStaticMeshComponent>(
@@ -63,11 +65,7 @@ void ABoss::Tick(float DeltaTime)
 	{ 
 		FVector BossToTargetDir = Attack2TargetLocation - GetActorLocation(); 
 		if (BossToTargetDir.Length() < 750.0f)
-		{
-			//BossToTargetDir += FVector(0, 0, -980.0f); 
-			// GetCharacterMovement()->AddImpulse(FVector(0, 0, -980.0f), true); 
-			//LaunchCharacter(BossToTargetDir, false, false); 
-			//GetCharacterMovement()->GravityScale *= 5.0f; 
+		{ 
 			if (auto MC = GetMovementComponent())
 			{
 				FVector& Vel = MC->Velocity;
@@ -75,21 +73,9 @@ void ABoss::Tick(float DeltaTime)
 				Vel = Vel.GetSafeNormal() * 2000.0f; 
 				Vel.Z = -980.0f; 
 			} 
-			IsActiveAttack2 = false;
-			IsAttack2Smash = true; 
+			IsActiveAttack2 = false; 
 		}
 	}
-	
-	FVector Pos;
-	FRotator Rot; 
-	BossMesh->GetSocketWorldLocationAndRotation("LHand", Pos, Rot); 
-	DrawDebugBox(GetWorld(), Pos, FVector(90, 90, 210), Rot.Quaternion(), FColor::Red); 
-	BossMesh->GetSocketWorldLocationAndRotation("RHand", Pos, Rot);
-	DrawDebugBox(GetWorld(), Pos, FVector(90, 90, 210), Rot.Quaternion(), FColor::Red); 
-	BossMesh->GetSocketWorldLocationAndRotation("LHand", Pos, Rot); 
-	DrawDebugBox(GetWorld(), Pos, FVector(75, 75, 180), Rot.Quaternion(), FColor::Red); 
-	BossMesh->GetSocketWorldLocationAndRotation("RHand", Pos, Rot); 
-	DrawDebugBox(GetWorld(), Pos, FVector(75, 75, 180), Rot.Quaternion(), FColor::Red); 
 }
 
 void ABoss::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -139,9 +125,9 @@ EAttackResult ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 				Blackboard->SetValueAsBool("IsPhase2", true); 
 				Blackboard->SetValueAsBool("IsAnimPhase2", false); 
 
-				NS_LightningAura_L->SetAutoActivate(true);  
-				NS_LightningAura_R->SetAutoActivate(true);
-				
+				NS_LightningAura_L->Activate(true); 
+	 			NS_LightningAura_R->Activate(true); 
+
 				GetWorld()->GetTimerManager().ClearTimer(Phase2TimerHandle);
 			}), 3.0f, false);
 		}
@@ -215,8 +201,8 @@ void ABoss::Attack(EAttackType Value)
 			FVector CalcVelocity(0);
 			Attack2TargetLocation = Player->GetActorLocation() + FVector(0, 0, 250.0f); 
 			UGameplayStatics::SuggestProjectileVelocity_CustomArc(GetWorld(), CalcVelocity, GetActorLocation(),
-																  GetPlayerAround(-BossToPlayerDist / 1.5f), 0.0f,
-																  0.8f); 
+																  GetPlayerAround(-BossToPlayerDist / (BossToPlayerDist >= 1900.0f ? 1.5f : 3.0f)), 0.0f,
+																  BossToPlayerDist >= 1900.0f ? 0.75f : 0.6f); 
 			LaunchCharacter(CalcVelocity, false, false); 
 			break; 
 		}
@@ -237,12 +223,6 @@ void ABoss::Attack(EAttackType Value)
 	case EAttackType::AT_Attack5:
 		IsActiveAttack5 = true;
 
-		GetWorld()->GetTimerManager().SetTimer(Attack5TimerHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			IsActiveAttack5 = false;
-
-			GetWorld()->GetTimerManager().ClearTimer(Attack5TimerHandle);
-		}), 0.1f, false);
 		break;
 	case EAttackType::AT_Attack6:
 		if (auto AI = BossMesh->GetAnimInstance())
@@ -260,26 +240,26 @@ void ABoss::SetAttackState(EAttackHand Hand, bool IsHandAttack, bool State)
 	case EAttackHand::AH_None:
 		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Center");
 		DirectHitCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Center");
-		HandAttackCollider->SetRelativeScale3D(FVector(0.4f, 0.4f, 0.7f));
-		DirectHitCollider->SetRelativeScale3D(FVector(0.4f, 0.4f, 0.7f));
+		HandAttackCollider->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.7f));
+		DirectHitCollider->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.7f));
 		break;
 	case EAttackHand::AH_Center:
 		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Center");
 		DirectHitCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Center");
-		HandAttackCollider->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.7f));
-		DirectHitCollider->SetRelativeScale3D(FVector(0.35f, 0.35f, 0.7f));
+		HandAttackCollider->SetRelativeScale3D(FVector(0.7f, 0.7f, 0.7f));
+		DirectHitCollider->SetRelativeScale3D(FVector(0.6f, 0.6f, 0.7f));
 		break;
 	case EAttackHand::AH_Left:
 		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "LHand");
 		DirectHitCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "LHand");
-		HandAttackCollider->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.8f));
-		DirectHitCollider->SetRelativeScale3D(FVector(0.35f, 0.35f, 0.7f));
+		HandAttackCollider->SetRelativeScale3D(FVector(0.6f, 0.6f, 0.8f));
+		DirectHitCollider->SetRelativeScale3D(FVector(0.525f, 0.525f, 0.7f));
 		break;
 	case EAttackHand::AH_Right:
 		HandAttackCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "RHand");
 		DirectHitCollider->AttachToComponent(BossMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "RHand");
-		HandAttackCollider->SetRelativeScale3D(FVector(0.4f, 0.4f, 0.75f));
-		DirectHitCollider->SetRelativeScale3D(FVector(0.3f, 0.3f, 0.675f));
+		HandAttackCollider->SetRelativeScale3D(FVector(0.6f, 0.6f, 0.8f));
+		DirectHitCollider->SetRelativeScale3D(FVector(0.525f, 0.525f, 0.7f));
 		break;
 	}
 
@@ -311,7 +291,7 @@ void ABoss::FocusToPlayer()
 	float Dir = GetActorForwardVector().Cross(GetBossToPlayerDir()).Z;
 	FocusToPlayerAngle *= Dir > 0 ? 1 : -1;
 
-	if (abs(FocusToPlayerAngle) > 5.0f)
+	if (abs(FocusToPlayerAngle) > 15.0f)
 	{
 		if (auto AI = BossMesh->GetAnimInstance())
 		{
@@ -498,9 +478,9 @@ void ABoss::Die()
 
 	StopLogic(); 
 
-	NS_LightningAura_L->SetAutoActivate(false);  
-	NS_LightningAura_R->SetAutoActivate(false); 
-	
+	NS_LightningAura_L->Deactivate(); 
+	NS_LightningAura_R->Deactivate(); 
+
 	BossInfoObject->RemoveFromParent();
 }
 
