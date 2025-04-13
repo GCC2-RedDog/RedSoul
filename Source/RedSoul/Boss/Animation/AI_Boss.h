@@ -23,6 +23,8 @@ public:
 	float FloorDist; 
 	
 	UPROPERTY(BlueprintReadOnly) 
+	bool IsAwake; 
+	UPROPERTY(BlueprintReadOnly) 
 	bool IsActiveAttack2;
 	UPROPERTY(BlueprintReadOnly) 
 	bool IsAttack2Smash;

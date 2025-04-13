@@ -15,6 +15,7 @@ void UAI_Boss::NativeUpdateAnimation(float DeltaSeconds)
 		Velocity.Z = 0;  
 		Speed = Velocity.Length(); 
 		
+		IsAwake = Boss->IsAwake; 
 		IsActiveAttack2 = Boss->IsActiveAttack2;
 		IsActiveAttack5 = Boss->IsActiveAttack5;
 		IsAttack5Success = Boss->IsAttack5Success; 
