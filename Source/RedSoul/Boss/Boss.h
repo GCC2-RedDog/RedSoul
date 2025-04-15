@@ -98,7 +98,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Stat)  
 	float MaxHP; 
-	UPROPERTY(EditAnywhere, Category = Stat)  
 	float CurHP; 
 	
 	UPROPERTY() 

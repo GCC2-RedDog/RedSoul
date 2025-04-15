@@ -24,6 +24,8 @@ void ABoss::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CurHP = MaxHP; 
+	
 	HandAttackCollider = FindComponentByTag<UBoxComponent>("Hand");
 	HandAttackCollider->OnComponentBeginOverlap.AddDynamic(this, &ABoss::OnHandAttackOverlapBegin);
 
@@ -265,7 +267,7 @@ void ABoss::FocusToPlayer()
 		IsFocusToPlayer = false;
 
 		GetWorld()->GetTimerManager().ClearTimer(FocusTimerHandle);
-	}), 0.4f, false);
+	}), 1.0f, false);
 }
 
 void ABoss::PlayerCatch()
@@ -293,7 +295,7 @@ void ABoss::PlayerThrow()
 
 	GetWorld()->GetTimerManager().SetTimer(ThrowTimerHandle, FTimerDelegate::CreateLambda([&]()
 	{
-		EAttackResult AR = Execute_Hit(Player, {10, false, false, false, 0, FVector(0), FVector(0)});
+		EAttackResult AR = Execute_Hit(Player, { 25.0f, false, true, false, 0, FVector(0), FVector(0) });
 		if (AR == EAttackResult::AR_Death)
 		{
 			StopLogic(); 
@@ -311,17 +313,17 @@ void ABoss::CheckDirectHit()
 	switch (AttackType)
 	{
 	case EAttackType::AT_Attack1:
-		AR = Execute_Hit(Player, { IsPhase2 ? 15.0f : 10, true, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal });
+		AR = Execute_Hit(Player, { IsPhase2 ? IsOverlapMesh ? 64.0f : 33.0f : IsOverlapMesh ? 46.0f : 28.0f, true, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal });
 		break;
 	case EAttackType::AT_Attack2:
-		AR = Execute_Hit(Player, { 10, false, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal });
+		AR = Execute_Hit(Player, { IsOverlapMesh ? 68.0f : 43.0f, false, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal });
 		break;
 	case EAttackType::AT_Attack3:
-		AR = Execute_Hit(Player, { IsPhase2 ? 15.0f : 10, true, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal });
-		if (AR == EAttackResult::AR_None) LaunchPlayer(GetFistSwingDir(), 1500.0f);
+		AR = Execute_Hit(Player, { IsPhase2 ? IsOverlapMesh ? 48.0f : 29.0f : IsOverlapMesh ? 33.0f : 24.0f, true, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal });
+		if (AR == EAttackResult::AR_None || IsOverlapMesh) LaunchPlayer(GetFistSwingDir(), 1500.0f);
 		break;
 	case EAttackType::AT_Attack4:
-		AR = Execute_Hit(Player, { 10, false, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal });
+		AR = Execute_Hit(Player, { IsPhase2 ? IsOverlapMesh ? 43.0f : 26.0f : IsOverlapMesh ? 37.0f : 21.0f, false, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal });
 		if (IsPhase2) LaunchPlayer(GetShoulderHitDir(), 750.0f);
 		SetAttackState(EAttackHand::AH_None, true, false);
 		GetCharacterMovement()->Velocity = FVector(0);
@@ -410,7 +412,7 @@ void ABoss::OnLightningExplosionAttackOverlapBegin(UPrimitiveComponent* Overlapp
 	bool bFromSweep, const FHitResult& SweepResult)
 {
 	SetAttackState(EAttackHand::AH_None, false, false);
-	Execute_Hit(Player, { 10, false, false, true, 1.0f, FVector(0), FVector(0) });
+	Execute_Hit(Player, { 39.0f, false, false, true, 1.0f, FVector(0), FVector(0) });
 } 
 
 void ABoss::OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
