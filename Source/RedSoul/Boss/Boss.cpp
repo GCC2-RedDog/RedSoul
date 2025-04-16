@@ -250,24 +250,27 @@ void ABoss::SetIgnoreToPlayer(bool State)
 
 void ABoss::FocusToPlayer()
 {
-	IsFocusToPlayer = true;
-
-	FocusToPlayerAngle = FMath::RadiansToDegrees(FMath::Acos(GetActorForwardVector().Dot(GetBossToPlayerDir())));
-
-	float Dir = GetActorForwardVector().Cross(GetBossToPlayerDir()).Z;
-	FocusToPlayerAngle *= Dir > 0 ? 1 : -1;
-
-	if (abs(FocusToPlayerAngle) > 15.0f)
+	if (!IsFocusToPlayer)
 	{
-		PlayMontage(Dir > 0 ? RTurn_Montage : LTurn_Montage); 
+		IsFocusToPlayer = true;
+
+		FocusToPlayerAngle = FMath::RadiansToDegrees(FMath::Acos(GetActorForwardVector().Dot(GetBossToPlayerDir())));
+
+		float Dir = GetActorForwardVector().Cross(GetBossToPlayerDir()).Z;
+		FocusToPlayerAngle *= Dir > 0 ? 1 : -1;
+
+		if (abs(FocusToPlayerAngle) > 5.0f)
+		{
+			PlayMontage(Dir > 0 ? RTurn_Montage : LTurn_Montage); 
+		}
+
+		GetWorld()->GetTimerManager().SetTimer(FocusTimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			IsFocusToPlayer = false;
+
+			GetWorld()->GetTimerManager().ClearTimer(FocusTimerHandle);
+		}), 0.5f, false);
 	}
-
-	GetWorld()->GetTimerManager().SetTimer(FocusTimerHandle, FTimerDelegate::CreateLambda([&]()
-	{
-		IsFocusToPlayer = false;
-
-		GetWorld()->GetTimerManager().ClearTimer(FocusTimerHandle);
-	}), 1.0f, false);
 }
 
 void ABoss::PlayerCatch()
@@ -320,7 +323,7 @@ void ABoss::CheckDirectHit()
 		break;
 	case EAttackType::AT_Attack3:
 		AR = Execute_Hit(Player, { IsPhase2 ? IsOverlapMesh ? 48.0f : 29.0f : IsOverlapMesh ? 33.0f : 24.0f, true, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal });
-		if (AR == EAttackResult::AR_None || IsOverlapMesh) LaunchPlayer(GetFistSwingDir(), 1500.0f);
+		if (AR == EAttackResult::AR_None && IsOverlapMesh) LaunchPlayer(GetFistSwingDir(), 1500.0f);
 		break;
 	case EAttackType::AT_Attack4:
 		AR = Execute_Hit(Player, { IsPhase2 ? IsOverlapMesh ? 43.0f : 26.0f : IsOverlapMesh ? 37.0f : 21.0f, false, IsOverlapMesh, false, 0, Hit.ImpactPoint, Hit.ImpactNormal });
