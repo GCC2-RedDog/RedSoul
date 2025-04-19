@@ -13,5 +13,10 @@ class REDSOUL_API UANS_Attack4 : public UAnimNotifyState
 
 public:
 	virtual void NotifyBegin(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) override;
-	
+	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
+
+private:
+	UPROPERTY()
+	TObjectPtr<class ABoss> Boss;
+
 };

@@ -2,6 +2,8 @@
 
 
 #include "ANS_Attack6.h" 
+#include "../Boss.h" 
+#include "NiagaraComponent.h" 
 
 void UANS_Attack6::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration,
 								  const FAnimNotifyEventReference& EventReference)
@@ -9,9 +11,9 @@ void UANS_Attack6::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 
 	if (Boss = Cast<ABoss>(MeshComp->GetOwner()))
-	{
-		Boss->LightningExplosionMesh->SetVisibility(true); 
-		Boss->SetAttackState(AH_None, false, true); 
+	{ 
+		Boss->SetAttackState(AH_None, false, true);
+		Boss->NS_LightningExplosion->Activate();
 	}
 }
 
@@ -21,8 +23,8 @@ void UANS_Attack6::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
 
 	if (Boss)
-	{
-		Boss->LightningExplosionMesh->SetVisibility(false); 
+	{ 
 		Boss->SetAttackState(AH_None, false, false); 
+		Boss->NS_LightningExplosion->Deactivate(); 
 	}
 }

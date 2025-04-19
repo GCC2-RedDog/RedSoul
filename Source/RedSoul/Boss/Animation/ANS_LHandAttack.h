@@ -3,13 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "../Boss.h" 
+#include "Animation/AnimNotifies/AnimNotifyState.h" 
 #include "ANS_LHandAttack.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class REDSOUL_API UANS_LHandAttack : public UAnimNotifyState
 {
@@ -21,6 +17,6 @@ public:
 
 private:
 	UPROPERTY()
-	TObjectPtr<ABoss> Boss;
+	TObjectPtr<class ABoss> Boss;
 	
 };

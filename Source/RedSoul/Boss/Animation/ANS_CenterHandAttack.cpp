@@ -2,8 +2,7 @@
 
 
 #include "ANS_CenterHandAttack.h"
-
-#include "GameFramework/CharacterMovementComponent.h"
+#include "../Boss.h" 
 
 void UANS_CenterHandAttack::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration,
                                const FAnimNotifyEventReference& EventReference)

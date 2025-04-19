@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h" 
-#include "../Boss.h" 
 #include "ANS_Attack6.generated.h"
 
 UCLASS()
@@ -18,6 +17,6 @@ public:
 
 private:
 	UPROPERTY()
-	TObjectPtr<ABoss> Boss;
+	TObjectPtr<class ABoss> Boss;
 	
 };
