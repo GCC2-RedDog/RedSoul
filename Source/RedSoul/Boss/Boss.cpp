@@ -14,6 +14,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h" 
 #include "Components/CapsuleComponent.h" 
+#include "Components/AudioComponent.h" 
 
 ABoss::ABoss()
 {
@@ -47,6 +48,8 @@ void ABoss::BeginPlay()
 	BossMesh = FindComponentByClass<USkeletalMeshComponent>(); 
 
 	BossInfoObject = CreateWidget<UBossUI>(GetWorld(), BossInfoWidget);
+
+	AudioComp = FindComponentByClass<UAudioComponent>(); 
 }
 
 void ABoss::Tick(float DeltaTime)
@@ -154,7 +157,9 @@ void ABoss::Interaction_Implementation(ACharacter* OtherCharacter)
 {
 	PlayMontage(Awake_Montage); 
 
-	Player = OtherCharacter;
+	Player = OtherCharacter; 
+
+	AudioComp->Play(); 
 
 	GetWorld()->GetTimerManager().SetTimer(AwakeTimerHandle, FTimerDelegate::CreateLambda([&]()
 	{
@@ -439,7 +444,9 @@ void ABoss::Die()
 	NS_LightningAura_L->Deactivate(); 
 	NS_LightningAura_R->Deactivate(); 
 
-	BossInfoObject->RemoveFromParent();
+	BossInfoObject->RemoveFromParent(); 
+
+	AudioComp->Stop(); 
 }
 
 void ABoss::StopLogic()
@@ -485,7 +492,7 @@ FVector ABoss::GetFistSwingDir()
 
 FVector ABoss::GetShoulderDir()
 {
-	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.05f)) * 3000.0f;
+	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.065f)) * 3000.0f;
 }
 
 FVector ABoss::GetThrowPlayerDir()

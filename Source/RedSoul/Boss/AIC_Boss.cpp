@@ -33,6 +33,6 @@ void AAIC_Boss::SetAttackCoolTime()
 		Blackboard->SetValueAsBool("IsCoolTime", false); 
 
 		GetWorld()->GetTimerManager().ClearTimer(CoolTimeHandle); 
-	}), 2.25f, false); 
+	}), 1.75f, false); 
 }
 

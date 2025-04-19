@@ -156,8 +156,11 @@ private:
 	TObjectPtr<class UNiagaraComponent> NS_LightningAura_L;
 	UPROPERTY(EditAnywhere, Category=VFX) 
 	TObjectPtr<class UNiagaraComponent> NS_LightningAura_R; 
+
+	UPROPERTY(EditAnywhere, Category=Sound)
+	TObjectPtr<class UAudioComponent> AudioComp; 
 	
-	EAttackType AttackType;
+	EAttackType AttackType; 
 
 	bool IsFocusToPlayer; 
 	bool IsHit;
