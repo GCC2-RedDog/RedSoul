@@ -12,7 +12,10 @@ void UANS_Attack4::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 	if (Boss = Cast<ABoss>(MeshComp->GetOwner()))
 	{
 		MeshComp->GetAnimInstance()->RootMotionMode = ERootMotionMode::IgnoreRootMotion; 
-		Boss->LaunchCharacter(Boss->GetShoulderDir(), false, false); 
+
+		FVector Dir = Boss->GetShoulderDir(); 
+		Boss->SetActorRotation(Dir.Rotation()); 
+		Boss->LaunchCharacter(Dir, false, false);
 	}
 } 
 
