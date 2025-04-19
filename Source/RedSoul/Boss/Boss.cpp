@@ -50,7 +50,7 @@ void ABoss::BeginPlay()
 	BossInfoObject = CreateWidget<UBossUI>(GetWorld(), BossInfoWidget);
 
 	AudioComp = FindComponentByClass<UAudioComponent>(); 
-}
+} 
 
 void ABoss::Tick(float DeltaTime)
 {
@@ -64,7 +64,7 @@ void ABoss::Tick(float DeltaTime)
 
 	if (IsFocusToPlayer)
 	{
-		AddActorLocalRotation(FRotator(0.0f, FocusToPlayerAngle * DeltaTime * 2.5f, 0.0f));
+		AddActorLocalRotation(FRotator(0.0f, FocusToPlayerAngle * DeltaTime * 2.0f, 0.0f));
 	} 
 
 	if (IsActiveAttack2)
@@ -199,13 +199,14 @@ void ABoss::Attack(EAttackType Value)
 																  GetPlayerAround(-BossToPlayerDist / (BossToPlayerDist >= 1900.0f ? 1.5f : 3.0f)), 0.0f,
 																  BossToPlayerDist >= 1900.0f ? 0.75f : 0.6f); 
 			LaunchCharacter(CalcVelocity, false, false); 
+			SetIgnoreToPlayer(true); 
 			break; 
 		}
 	case EAttackType::AT_Attack3:
 		PlayMontage(Attack3_Montage); 
 		break;
 	case EAttackType::AT_Attack4:
-		GetController()->StopMovement();
+		GetController()->StopMovement(); 
 		PlayMontage(Attack4_Montage); 
 		break;
 	case EAttackType::AT_Attack5:
@@ -249,8 +250,8 @@ void ABoss::SetAttackState(EAttackHand Hand, bool IsHandAttack, bool State)
 
 void ABoss::SetIgnoreToPlayer(bool State)
 {
-	if (State) BossMesh->MoveIgnoreActors.Add(Player);
-	else BossMesh->MoveIgnoreActors.Remove(Player); 
+	if (State) GetCapsuleComponent()->MoveIgnoreActors.Add(Player);
+	else GetCapsuleComponent()->MoveIgnoreActors.Remove(Player);
 }
 
 void ABoss::FocusToPlayer()
@@ -492,7 +493,7 @@ FVector ABoss::GetFistSwingDir()
 
 FVector ABoss::GetShoulderDir()
 {
-	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.065f)) * 3000.0f;
+	return (GetBossToPlayerDir() + FVector(0.0f, 0.0f, 0.05f)) * 3250.0f;
 }
 
 FVector ABoss::GetThrowPlayerDir()
