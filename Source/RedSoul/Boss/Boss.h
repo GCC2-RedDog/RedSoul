@@ -70,7 +70,8 @@ public:
 	bool IsAttack5Success; 
 	bool IsPhase2; 
 	bool IsDie; 
-	bool IsParryed; 
+	bool IsParryed;
+	bool IsDieEnd; 
 	
 	UPROPERTY(EditAnywhere, Category = VFX)
 	TObjectPtr<class UNiagaraComponent> NS_LightningExplosion; 
@@ -159,6 +160,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category=Sound)
 	TObjectPtr<class UAudioComponent> AudioComp; 
+
+	UPROPERTY(EditAnywhere, Category=Materials) 
+	TObjectPtr<class UMaterialParameterCollection> MPC_Boss;
+	UPROPERTY() 
+	TObjectPtr<class UMaterialParameterCollectionInstance> MPCI_Boss; 
 	
 	EAttackType AttackType; 
 
@@ -170,6 +176,8 @@ private:
 
 	float FocusToPlayerAngle; 
 	float BossToPlayerDist;
+
+	float DissolveTimer; 
 
 	FVector Attack2TargetLocation; 
 };

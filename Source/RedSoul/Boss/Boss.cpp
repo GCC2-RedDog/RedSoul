@@ -15,6 +15,7 @@
 #include "NiagaraComponent.h" 
 #include "Components/CapsuleComponent.h" 
 #include "Components/AudioComponent.h" 
+#include "Materials/MaterialParameterCollectionInstance.h" 
 
 ABoss::ABoss()
 {
@@ -49,37 +50,52 @@ void ABoss::BeginPlay()
 
 	BossInfoObject = CreateWidget<UBossUI>(GetWorld(), BossInfoWidget);
 
-	AudioComp = FindComponentByClass<UAudioComponent>(); 
+	AudioComp = FindComponentByClass<UAudioComponent>();
+
+	MPCI_Boss = GetWorld()->GetParameterCollectionInstance(MPC_Boss); 
 } 
 
 void ABoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (Player && Blackboard)
+	if (IsDieEnd)
 	{
-		BossToPlayerDist = (GetActorLocation() - Player->GetActorLocation()).Length();
-		Blackboard->SetValueAsFloat("BossToPlayerDistance", BossToPlayerDist);
+		if (DissolveTimer > 2.0f)
+		{
+			return; 
+		}
+		
+		MPCI_Boss->SetScalarParameterValue(FName("Time"), DissolveTimer); 
+		DissolveTimer += DeltaTime;
 	}
-
-	if (IsFocusToPlayer)
+	else
 	{
-		AddActorLocalRotation(FRotator(0.0f, FocusToPlayerAngle * DeltaTime * 2.0f, 0.0f));
-	} 
+		if (Player && Blackboard)
+		{
+			BossToPlayerDist = (GetActorLocation() - Player->GetActorLocation()).Length();
+			Blackboard->SetValueAsFloat("BossToPlayerDistance", BossToPlayerDist);
+		}
 
-	if (IsActiveAttack2)
-	{ 
-		FVector BossToTargetDir = Attack2TargetLocation - GetActorLocation(); 
-		if (BossToTargetDir.Length() < 750.0f)
+		if (IsFocusToPlayer)
+		{
+			AddActorLocalRotation(FRotator(0.0f, FocusToPlayerAngle * DeltaTime * 2.0f, 0.0f));
+		} 
+
+		if (IsActiveAttack2)
 		{ 
-			if (auto MC = GetMovementComponent())
-			{
-				FVector& Vel = MC->Velocity;
-				Vel.Z = 0; 
-				Vel = Vel.GetSafeNormal() * 2000.0f; 
-				Vel.Z = -980.0f; 
-			} 
-			IsActiveAttack2 = false; 
+			FVector BossToTargetDir = Attack2TargetLocation - GetActorLocation(); 
+			if (BossToTargetDir.Length() < 750.0f)
+			{ 
+				if (auto MC = GetMovementComponent())
+				{
+					FVector& Vel = MC->Velocity;
+					Vel.Z = 0; 
+					Vel = Vel.GetSafeNormal() * 2000.0f; 
+					Vel.Z = -980.0f; 
+				} 
+				IsActiveAttack2 = false; 
+			}
 		}
 	}
 }
@@ -115,8 +131,8 @@ EAttackResult ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 		{ 
 			IsPhase2 = true; 
 			
-			PlayMontage(Phase2_Montage); 
-
+			PlayMontage(Phase2_Montage);
+			
 			Blackboard->SetValueAsBool("IsAnimPhase2", true);
 			GetWorld()->GetTimerManager().SetTimer(Phase2TimerHandle, FTimerDelegate::CreateLambda([&]()
 			{
@@ -126,7 +142,8 @@ EAttackResult ABoss::Hit_Implementation(FAttackInfo AttackInfo)
 				NS_LightningAura_L->Activate(true); 
 	 			NS_LightningAura_R->Activate(true); 
 
-				GetCapsuleComponent()->SetCapsuleRadius(175.0f); 
+				SetActorLocation(GetActorLocation() - GetBossToPlayerDir() * 5.0f); 
+				GetCapsuleComponent()->SetCapsuleRadius(175.0f);
 
 				GetWorld()->GetTimerManager().ClearTimer(Phase2TimerHandle);
 			}), 3.0f, false);
@@ -447,7 +464,9 @@ void ABoss::Die()
 
 	BossInfoObject->RemoveFromParent(); 
 
-	AudioComp->Stop(); 
+	AudioComp->Stop();
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
 }
 
 void ABoss::StopLogic()
