@@ -57,21 +57,23 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure) 
 	FVector GetPlayerAround(float Distance); 
 	FHitResult GetHitResult(FVector AttackColliderLocation, FVector HitActorLocation); 
-	
+
 	FVector GetShoulderDir(); 
 	
 	UPROPERTY()
 	TObjectPtr<class UBlackboardComponent> Blackboard;
 	
+	bool IsAwake; 
 	bool IsActiveAttack2;
 	bool IsAttack2Smash; 
 	bool IsActiveAttack5;
 	bool IsAttack5Success; 
 	bool IsPhase2; 
-	bool IsDie;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UStaticMeshComponent> LightningExplosionMesh;
+	bool IsDie; 
+	bool IsParryed; 
+	
+	UPROPERTY(EditAnywhere, Category = VFX)
+	TObjectPtr<class UNiagaraComponent> NS_LightningExplosion; 
 
 private: 
 	UFUNCTION()
@@ -84,7 +86,10 @@ private:
 	void LaunchPlayer(FVector Dir, float Force); 
 	void Die();
 
-	void StopLogic();
+	void StopLogic(); 
+
+	void SetHandCollider(FString Socket, FVector Scale); 
+	void PlayMontage(UAnimMontage* Montage); 
 	
 	FVector GetBossToPlayerDir(); 
 	FVector GetFistSwingDir(); 
@@ -93,7 +98,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Stat)  
 	float MaxHP; 
-	UPROPERTY(EditAnywhere, Category = Stat)  
 	float CurHP; 
 	
 	UPROPERTY() 
@@ -152,10 +156,12 @@ private:
 	TObjectPtr<class UNiagaraComponent> NS_LightningAura_L;
 	UPROPERTY(EditAnywhere, Category=VFX) 
 	TObjectPtr<class UNiagaraComponent> NS_LightningAura_R; 
-	
-	EAttackType AttackType;
 
-	bool IsAwake; 
+	UPROPERTY(EditAnywhere, Category=Sound)
+	TObjectPtr<class UAudioComponent> AudioComp; 
+	
+	EAttackType AttackType; 
+
 	bool IsFocusToPlayer; 
 	bool IsHit;
 	

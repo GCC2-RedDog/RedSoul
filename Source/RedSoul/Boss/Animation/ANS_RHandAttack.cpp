@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ANS_RHandAttack.h"
+#include "ANS_RHandAttack.h" 
+#include "../Boss.h" 
 
 void UANS_RHandAttack::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration,
 								   const FAnimNotifyEventReference& EventReference)
