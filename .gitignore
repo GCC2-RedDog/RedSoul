@@ -74,3 +74,12 @@ Plugins/**/Intermediate/*
 DerivedDataCache/*
 
 Content/Assets/*
+Content/ParagonRampage/* 
+Content/Basic_VFX/*
+Content/DrapEffet/*
+Content/FXVarietyPack/*
+Content/LightVortexShader/*
+Content/MixedVFX/*
+Content/Realistic_Starter_VFX_Pack_Vol2/*
+
+.idea/*
